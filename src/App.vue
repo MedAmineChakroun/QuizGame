@@ -1,11 +1,31 @@
-<template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view />
-</template>
 
+<template>
+  <div id="app">
+    <audio ref="backgroundAudio" loop>
+      <source src="@/assets/make-a-wish.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+    <router-view @play-audio="playBackgroundAudio" @pause-audio="pauseBackgroundAudio" />
+  </div>
+</template>
+<script>
+export default {
+  name: 'App',
+  mounted() {
+    this.$refs.backgroundAudio.play();
+  },
+  methods: {
+    playBackgroundAudio() {
+      const audio = this.$refs.backgroundAudio;
+      audio.play();
+    },
+    pauseBackgroundAudio() {
+      const audio = this.$refs.backgroundAudio;
+      audio.pause();
+    },
+  },
+};
+</script>
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
