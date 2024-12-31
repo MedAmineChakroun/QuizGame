@@ -7,7 +7,7 @@
                </a> 
             </div>
             <div class="shopDiv">
-                <a href="#"><i class="pi pi-shop" style="font-size: 2rem"></i>
+                <a href="/#/shop"><i class="pi pi-shop" style="font-size: 2rem"></i>
             </a>
             </div>
             <div class="settingsDiv">
@@ -67,7 +67,7 @@ a {
 .leftDiv{
     gap: 10px;
 }
-.leftDiv div, .rightDiv div {
+.leftDiv div{
     background-color: #fdffb6;
     border-radius: 50%;
     aspect-ratio: 1;
@@ -79,15 +79,27 @@ a {
     border: solid 3px white;
     box-shadow: 3px 3px 12px rgb(67, 63, 63);
 }
+.rightDiv div{
+    aspect-ratio: 1;
+    width: 80px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    transform: skew(-10deg);
+}
 
 /* Optional: Adjust size of circles for larger screens */
 @media (min-width: 768px) {
     .leftDiv div, .rightDiv div {
         min-width: 80px;
-        min-height: 80px;
+        min-height: 50px;
     }
 }
 .coinsDiv a{
     font-size: 25px;
+    color: #fb6107;
 }
+
 </style>

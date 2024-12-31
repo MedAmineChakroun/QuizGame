@@ -11,38 +11,64 @@ const routes = [
   {
     path: "/about",
     name: "about",
-    component: () => import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
   },
   {
     path: "/lobby",
     name: "lobby",
-    component: () => import(/* webpackChunkName: "lobby" */ "../views/LobbyView.vue"),
+    component: () =>
+      import(/* webpackChunkName: "lobby" */ "../views/LobbyView.vue"),
   },
   {
     path: "/categories",
     name: "categories",
-    component: () => import(/* webpackChunkName: "categories" */ "../views/CategoriesView.vue"),
+    component: () =>
+      import(
+        /* webpackChunkName: "categories" */ "../views/CategoriesView.vue"
+      ),
   },
   {
-    path: "/game",
+    path: "/game/:categorieId",
     name: "game",
-    component: () => import(/* webpackChunkName: "game" */ "../views/GameView.vue"),
+    component: () =>
+      import(/* webpackChunkName: "game" */ "../views/GameView.vue"),
   },
   {
     path: "/settings",
     name: "settings",
-    component: () => import(/* webpackChunkName: "settings" */ "../views/SettingsView.vue"),
+    component: () =>
+      import(/* webpackChunkName: "settings" */ "../views/SettingsView.vue"),
   },
   {
     path: "/profil",
     name: "profil",
-    component: () => import(/* webpackChunkName: "profil" */ "../views/PlayerProfilView.vue"),
-  }
+    component: () =>
+      import(/* webpackChunkName: "profil" */ "../views/PlayerProfilView.vue"),
+  },
+  {
+    path: "/shop",
+    name: "shop",
+    component: () =>
+      import(/* webpackChunkName: "shop" */ "../views/ShopView.vue"),
+  },
+  {
+    path: "/victory",
+    name: "victory",
+    component: () =>
+      import(/* webpackChunkName: "victory" */ "../views/victoryView.vue"),
+  },
+  {
+    path: "/defeat",
+    name: "defeat",
+    component: () =>
+      import(/* webpackChunkName: "defeat" */ "../views/LosingView.vue"),
+  },
 ];
 
 // Create router instance
 const router = createRouter({
-  history: createWebHashHistory(), // Using hash mode for history
+  history: createWebHashHistory(process.env.BASE_URL),
   routes,
 });
 

@@ -13,15 +13,18 @@
             </div>
         </div>
     </div>
+    <backComponent/>
 </template>
 
 <script>
 import navBar from '@/components/navBar.vue'
+import backComponent from '@/components/BackToLobby.vue'
 
 export default {
     name: "SettingsView",
     components: {
-        navBar
+        navBar,
+        backComponent
     },
     data() {
         return {

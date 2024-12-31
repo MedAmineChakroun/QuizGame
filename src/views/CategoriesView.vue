@@ -1,52 +1,65 @@
 <template>
+  <div>
+    <nav-bar />
+    <playerBarSection />
     <div>
-        <nav-bar/>
-        <playerBarSection/>
-    <div>
-        <h1 class="select-text">Select a Category To Start!</h1>
-        <div class="category-container">
-            <CategoryCard :categoryName="category.name" :categoryLink="category.link" />
-            <CategoryCard :categoryName="category.name" :categoryLink="category.link" />
-            <CategoryCard :categoryName="category.name" :categoryLink="category.link" />
-            <CategoryCard :categoryName="category.name" :categoryLink="category.link" />
-            <CategoryCard :categoryName="category.name" :categoryLink="category.link" />
-            <CategoryCard :categoryName="category.name" :categoryLink="category.link" />
-        </div>
+      <h1 class="select-text">Select a Category To Start!</h1>
+      <div class="category-container">
+        <CategoryCard v-for="category in categories" :key="category.id" :categoryName="category.categorieName"
+          :categoryDescription="category.categorieDescription" :categoryId="category.id"
+          @continue-selected="handleContinueSelected" />
+      </div>
     </div>
-    </div>
+  </div>
 </template>
+
 <script>
 import navBar from '@/components/navBar.vue';
 import playerBarSection from '@/components/playerBarSection.vue';
-import CategoryCard from '@/components/categorieCard.vue';
+import CategoryCard from '@/components/CategoryCard.vue';
+import axios from 'axios';
 
-export default{
-    name:"categoriesView",
-    components:{
-        navBar,
-        playerBarSection,
-        CategoryCard
-    },
-    data() {
+export default {
+  name: "CategoriesView",
+  components: {
+    navBar,
+    playerBarSection,
+    CategoryCard
+  },
+  data() {
     return {
-      category: {
-        name: "Test Category",
-        link: "/test-category"
-      }
+      categories: []
     };
+  },
+  created() {
+    axios.get('http://localhost:8090/categories')
+      .then(response => {
+        this.categories = response.data;
+      })
+      .catch(error => {
+        console.error("There was an error!", error);
+      });
+  },
+  methods: {
+    handleContinueSelected(categoryId) {
+      console.log("Selected Category ID for Continue:", categoryId);
+      // Redirect to mapComponent with the selected categoryId
+      this.$router.push({ path: `/game/${categoryId}` });
+    }
   }
+};
+</script>
+
+<style>
+.select-text {
+  font-family: "Lilita One", sans-serif;
+  color: white;
 }
 
-</script>
-<style>
-.select-text{
-    font-family: "Lilita One", sans-serif;
-    color: white;
-}
 .category-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around; /* Adjust as needed */
+  justify-content: space-around;
   row-gap: 10px;
   margin-top: 50px;
 }
@@ -56,5 +69,4 @@ export default{
     justify-content: center;
   }
 }
-
 </style>

@@ -10,6 +10,7 @@
   "dependencies": {
     "@fortawesome/vue-fontawesome": "^3.0.6",
     "@popperjs/core": "^2.11.8",
+    "axios": "^1.7.2",
     "bootstrap": "^5.3.3",
     "core-js": "^3.8.3",
     "primeicons": "^7.0.0",

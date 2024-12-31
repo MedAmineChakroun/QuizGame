@@ -9,8 +9,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
     <title><%= htmlWebpackPlugin.options.title %></title>
   
   </head>
@@ -22,11 +20,12 @@
     <!-- built files will be auto injected -->
   </body>
 </html>
-<style>
+<style >
   html,body {
     height: 100%;
   background-image: linear-gradient(to right top, #051937, #004d7a, #008793, #93e1d8);
   background-repeat: no-repeat; /* Prevent the gradient from repeating vertically */
-  background-size:cover ; /* Ensure the gradient covers the entire background */
-}
+  background-size:cover ;
+  background-attachment: fixed; /* Ensure the gradient covers the entire background */
+} 
 </style>
