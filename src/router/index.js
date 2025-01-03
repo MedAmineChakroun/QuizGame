@@ -35,7 +35,7 @@ const routes = [
       ),
   },
   {
-    path: "/game/:categorieId",
+    path: "/game/:partieId",
     name: "game",
     component: () =>
       import(/* webpackChunkName: "game" */ "../views/GameView.vue"),

@@ -8,6 +8,7 @@
 <script>
 import navBar from '@/components/navBar.vue';
 import mapComponent from '@/components/mapComponent.vue';
+import axios from 'axios';
 
 export default {
     name: "GameView",
@@ -15,9 +16,22 @@ export default {
         navBar,
         mapComponent
     },
-    computed: {
-        categorieId() {
-            return this.$route.params.categorieId; // Retrieve categoryId from route params
+    data() {
+        return {
+            categorieId: null, // Initialize categorieId to null
+        };
+    },
+    async mounted() {
+        const partieId = this.$route.params.partieId; // Retrieve partieId from route params
+        console.log(partieId);
+
+        try {
+            // Fetch the party details to get the categorieId
+            const response = await axios.get(`http://localhost:8090/parties/${partieId}`);
+            console.log(response.data.categorie.id);
+            this.categorieId = response.data.categorie.id; // Assign categorieId from response
+        } catch (error) {
+            console.error("Error fetching partie data:", error);
         }
     }
 }

@@ -2,12 +2,13 @@
   <div>
     <playerBarSection />
     <div class="hearts-container">
-      <img class="heart-img" src="@/assets/heart.png" alt="" />
-      <img class="heart-img" src="@/assets/heart.png" alt="" />
-      <img class="heart-img" src="@/assets/heart.png" alt="" />
+      <template v-for="i in nbHeart" :key="i">
+        <img class="heart-img" src="@/assets/heart.png" alt="Heart Icon" />
+      </template>
     </div>
     <div class="levels-container">
-      <levelComponent v-for="level in questions" :key="level.id" :categorieId="categorieId" :levelId="level.id" />
+      <levelComponent v-for="(level, i) in questions" :key="level.id" :categorieId="categorieId" :levelId="level.id"
+        :questionNumber="i" />
     </div>
     <div class="back-div">
       <a href="/#/categories" class="back-link">
@@ -20,7 +21,8 @@
 <script>
 import playerBarSection from './playerBarSection.vue';
 import levelComponent from './questionComponent.vue';
-import QuestionService from '@/services/QuestionService'; // Import the QuestionService
+import QuestionService from '@/services/QuestionService';
+import axios from 'axios';
 
 export default {
   name: "mapComponent",
@@ -36,18 +38,56 @@ export default {
   },
   data() {
     return {
+      nbHeart: 3,
       questions: [],
-      loading: true,  // This will hold the fetched questions
+      loading: true,
     };
   },
-  async mounted() {
-    // Fetch the questions and answers when the component is mounted
-    this.questions = await QuestionService.fetchQuestions(this.categorieId);
+  watch: {
+    // Watch for changes in categorieId
+    categorieId(newCategorieId) {
+      if (newCategorieId) {
+        this.fetchQuestions(newCategorieId);
+      }
+    },
+    // Watch for changes in partieId to fetch the nbHeart value
+    '$route.params.partieId': 'fetchPartieData',
+  },
+  methods: {
+    async fetchQuestions(categorieId) {
+      try {
+        this.loading = true;
+        this.questions = await QuestionService.fetchQuestions(categorieId);
+        this.loading = false;
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+        this.loading = false;
+      }
+    },
+    async fetchPartieData(partieId) {
+      try {
+        const response = await axios.get(`http://localhost:8090/parties/${partieId}`);
+        const partieData = response.data;
+
+        this.nbHeart = partieData.nbHeart; // Update nbHeart from partie data
+        this.fetchQuestions(this.categorieId); // Fetch questions after getting the heart value
+      } catch (error) {
+        console.error("Error fetching partie data:", error);
+        this.loading = false;
+      }
+    }
+  },
+  mounted() {
+    const partieId = this.$route.params.partieId; // Retrieve partieId from route params
+    if (partieId) {
+      this.fetchPartieData(partieId);
+    } else {
+      console.error('Partie ID is not available.');
+      this.loading = false;
+    }
   }
 }
 </script>
-
-
 
 <style scoped>
 .back-link {
@@ -68,7 +108,6 @@ export default {
   position: fixed;
   top: 170px;
   margin-left: 70px;
-
 }
 
 .back-div:hover a {
@@ -99,15 +138,10 @@ export default {
 
 .map-component {
   position: relative;
-  /* Change position to relative */
   height: auto;
-  /* Remove fixed height */
   min-height: 100%;
-  /* Ensure minimum height of 100% */
   width: 100%;
-
   overflow: auto;
-  /* Add overflow property for scrolling */
 }
 
 .levels-container {
@@ -119,8 +153,6 @@ export default {
   padding: 20px;
   max-width: 900px;
   margin: auto;
-  /* Add a max-width to prevent the levels from becoming too wide */
   margin-top: 100px;
-  /* Center the levels horizontally */
 }
 </style>

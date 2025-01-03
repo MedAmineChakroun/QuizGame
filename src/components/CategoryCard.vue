@@ -39,12 +39,15 @@ export default {
           // If the game exists, ask the user for confirmation
           const userConfirmed = confirm("A game already exists for this category. Do you want to delete it and create a new one?");
 
-          if (userConfirmed) {
-            // Delete the existing game
-            await axios.delete(
-              `http://localhost:8090/parties/${checkResponse.data.id}`
-            );
+          if (!userConfirmed) {
+            // If the user cancels, simply return and do not create a new game
+            return; // Exit the function early
           }
+
+          // If the user confirmed, delete the existing game
+          await axios.delete(
+            `http://localhost:8090/parties/${checkResponse.data.id}`
+          );
         }
 
         // Create the new game
@@ -53,8 +56,8 @@ export default {
         );
 
         if (response.status === 201) {
-
-          this.$router.push({ path: `/game/${categoryId}` });
+          const partieId = response.data.id;
+          this.$router.push({ path: `/game/${partieId}` });
         } else {
           alert(`Unexpected response status: ${response.status}`);
         }
@@ -63,6 +66,7 @@ export default {
         alert("An error occurred while creating a new game.");
       }
     }
+
     ,
     async continueGame() {
       const firebaseUserUid = localStorage.getItem("firebaseUserUid");
@@ -74,9 +78,10 @@ export default {
           `http://localhost:8090/parties/exists?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
         );
 
+        const partieId = checkResponse.data.id;
 
         if (checkResponse.data) {
-          this.$router.push({ path: `/game/${categoryId}` });
+          this.$router.push({ path: `/game/${partieId}` });
         } else {
           alert("No game exists for this category.");
         }

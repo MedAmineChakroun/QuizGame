@@ -2,23 +2,23 @@
     <div class="playerBarSection">
         <div class="leftDiv">
             <div class="profilDiv">
-               <a href="/#/profil">
-                <i class="pi pi-user" style="font-size: 2rem"></i>
-               </a> 
+                <a href="/#/profil">
+                    <i class="pi pi-user" style="font-size: 2rem"></i>
+                </a>
             </div>
             <div class="shopDiv">
                 <a href="/#/shop"><i class="pi pi-shop" style="font-size: 2rem"></i>
-            </a>
+                </a>
             </div>
             <div class="settingsDiv">
                 <a href="/#/settings"><i class="pi pi-cog" style="font-size: 2rem"></i></a>
-                
+
             </div>
         </div>
         <div class="rightDiv">
             <div class="coinsDiv">
-                <a href="/#/lobby">
-                    500 C
+                <a>
+                    {{ this.gold }}
                 </a>
             </div>
         </div>
@@ -26,26 +26,67 @@
 </template>
 
 <script>
-import 'primeicons/primeicons.css';
+import "primeicons/primeicons.css";
+import axios from "axios";
+
 export default {
-  name: "playerBarSection",
+    name: "playerBarSection",
+    data() {
+        return {
+            gold: 0, // Default value
+        };
+    },
+    methods: {
+        async fetchPlayerData() {
+            try {
+                const firebaseUserUid = localStorage.getItem("firebaseUserUid");
+                if (!firebaseUserUid) {
+                    console.error("Firebase User UID is missing from localStorage.");
+                    return;
+                }
+                const response = await axios.get(`http://localhost:8090/players/player/${firebaseUserUid}`);
+                this.gold = response.data.gold;
+            } catch (error) {
+                console.error("Error fetching player data:", error);
+            }
+        },
+
+    },
+    watch: {
+        gold(newValue, oldValue) {
+            console.log(`Gold value changed from ${oldValue} to ${newValue}`);
+            // Perform any action needed when gold changes, like animations or notifications.
+        },
+    },
+    mounted() {
+        this.fetchPlayerData(); // Initial fetch
+        // Optionally set up a WebSocket or polling to update the gold dynamically.
+    },
 };
 </script>
 
 <style scoped>
-
 a {
-  display: inline-flex; /* Use flexbox */
-  align-items: center; /* Align items vertically center */
+    display: inline-flex;
+    /* Use flexbox */
+    align-items: center;
+    /* Align items vertically center */
 }
-.playerBarSection a{
+
+a:hover {
+    cursor: pointer;
+}
+
+.playerBarSection a {
     color: #001233;
     text-decoration-line: none;
     transition: 0.3s;
 }
-.playerBarSection a:hover{
+
+.playerBarSection a:hover {
     transform: scale(1.1);
 }
+
 .playerBarSection {
     height: 100px;
     width: 90%;
@@ -56,18 +97,21 @@ a {
     justify-content: space-between;
     color: 291720;
     font-family: "Lilita One", sans-serif;
-    font-size: 20px ;
-    
+    font-size: 20px;
+
 }
 
-.leftDiv, .rightDiv {
+.leftDiv,
+.rightDiv {
     display: flex;
     align-items: center;
 }
-.leftDiv{
+
+.leftDiv {
     gap: 10px;
 }
-.leftDiv div{
+
+.leftDiv div {
     background-color: #fdffb6;
     border-radius: 50%;
     aspect-ratio: 1;
@@ -79,7 +123,8 @@ a {
     border: solid 3px white;
     box-shadow: 3px 3px 12px rgb(67, 63, 63);
 }
-.rightDiv div{
+
+.rightDiv div {
     aspect-ratio: 1;
     width: 80px;
     height: 40px;
@@ -92,14 +137,16 @@ a {
 
 /* Optional: Adjust size of circles for larger screens */
 @media (min-width: 768px) {
-    .leftDiv div, .rightDiv div {
+
+    .leftDiv div,
+    .rightDiv div {
         min-width: 80px;
         min-height: 50px;
     }
 }
-.coinsDiv a{
+
+.coinsDiv a {
     font-size: 25px;
     color: #fb6107;
 }
-
 </style>

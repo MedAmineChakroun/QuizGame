@@ -1,6 +1,6 @@
 <template>
   <div class="level-component">
-    <h2 class="level" @click="openQuestionModal">{{ levelId }}</h2>
+    <h2 class="level" @click="openQuestionModal">{{ questionNumber + 1 }}</h2>
     <QuestionModalComponent v-show="showModal" :levelId="levelId" @close="closeQuestionModal" />
   </div>
 </template>
@@ -23,6 +23,10 @@ export default {
       type: Number,
       required: true
     },
+    questionNumber: {
+      type: Number,
+      required: true
+    }
   },
   methods: {
     openQuestionModal() {
