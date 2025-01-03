@@ -6,8 +6,7 @@
       <h1 class="select-text">Select a Category To Start!</h1>
       <div class="category-container">
         <CategoryCard v-for="category in categories" :key="category.id" :categoryName="category.categorieName"
-          :categoryDescription="category.categorieDescription" :categoryId="category.id"
-          @continue-selected="handleContinueSelected" />
+          :categoryDescription="category.categorieDescription" :categoryId="category.id" />
       </div>
     </div>
   </div>
@@ -40,13 +39,7 @@ export default {
         console.error("There was an error!", error);
       });
   },
-  methods: {
-    handleContinueSelected(categoryId) {
-      console.log("Selected Category ID for Continue:", categoryId);
-      // Redirect to mapComponent with the selected categoryId
-      this.$router.push({ path: `/game/${categoryId}` });
-    }
-  }
+
 };
 </script>
 

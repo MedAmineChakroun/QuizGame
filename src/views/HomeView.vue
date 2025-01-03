@@ -1,9 +1,9 @@
 <template>
   <div class="home">
     <navBar />
-    
+
     <h1 class="welcome-text">The Biggest Challenge for your friends!</h1>
-    <a href="/#/lobby">
+    <a href="/#/login">
       <button>Join Us!</button>
     </a>
     <img class="characters" src="@/assets/personajesfooter_banner.svg" alt="">
@@ -23,7 +23,6 @@ export default {
 };
 </script>
 <style scoped>
-
 .welcome-text {
   position: fixed;
   top: 150px;

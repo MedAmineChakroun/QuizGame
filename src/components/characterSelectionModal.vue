@@ -1,5 +1,6 @@
 <template>
-    <div class="modal fade custom-modal-height" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade custom-modal-height" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
@@ -9,32 +10,32 @@
                 <div class="modal-body">
                     <div class="characters-div">
                         <div class="character-div">
-                            <img  src="@/assets/redCharacter.png" alt="">
+                            <img src="@/assets/redCharacter.png" alt="">
                             <p style="margin: 0px">character name</p>
                             <button class="select-btn">Select</button>
                         </div>
                         <div class="character-div">
-                            <img  src="@/assets/zez.png" alt="">
+                            <img src="@/assets/zez.png" alt="">
                             <p style="margin: 0px">character name</p>
 
                             <button class="select-btn">Select</button>
-                         
+
                         </div>
                         <div class="character-div">
-                            <img  src="@/assets/Al.png" alt="">
+                            <img src="@/assets/Al.png" alt="">
                             <p style="margin: 0px"> character name</p>
-                            
+
                             <button class="select-btn">Select</button>
-                        
+
                         </div>
                         <div class="character-div">
-                            <img  src="@/assets/Bonzo.png" alt="">
+                            <img src="@/assets/Bonzo.png" alt="">
                             <p style="margin: 0px">character name</p>
-                            
+
                             <button class="select-btn">Select</button>
                         </div>
-                       
-                     
+
+
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -51,10 +52,11 @@ export default {
 }
 </script>
 <style scoped>
-*{
+* {
     font-family: "Lilita One", sans-serif;
 }
-.select-btn{
+
+.select-btn {
     padding: 10px 15px;
     background-color: #f77f00;
     color: white;
@@ -63,16 +65,21 @@ export default {
     cursor: pointer;
     transition: 0.3s;
 }
-.select-btn:hover{
+
+.select-btn:hover {
     transform: scale(1.05);
     background-color: #ff6d00;
 
 }
+
 .characters-div {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* Adjust column width as needed */
-    gap: 10px; /* Space between characters */
-    overflow-y: auto; /* Vertical scrollbar if content overflows */
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    /* Adjust column width as needed */
+    gap: 10px;
+    /* Space between characters */
+    overflow-y: auto;
+    /* Vertical scrollbar if content overflows */
     max-height: 400px;
     margin-top: 30px;
     column-gap: 20px;
@@ -89,15 +96,18 @@ export default {
     justify-content: center;
     transition: 0.3s;
     gap: 20px;
-    
+
 }
-.character-div img:hover{
+
+.character-div img:hover {
     transform: scale(1.05);
 }
+
 .modal-body {
     height: 500px !important;
     background-color: #fefae0;
 }
+
 img {
     width: 200px;
     transition: 0.3s;

@@ -5,8 +5,8 @@ import store from "./store";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.js";
 
-
-const app = createApp(App)
-app.use(store)
-app.use(router)
-app.mount('#app')
+const app = createApp(App);
+app.use(store);
+app.use(router);
+router.push("/login");
+app.mount("#app");

@@ -69,7 +69,7 @@ export default {
     },
     isModalVisible: {
       type: Boolean,
-      required: true
+
     }
   },
   data() {

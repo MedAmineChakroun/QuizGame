@@ -17,56 +17,84 @@ export default {
   props: {
     categoryName: String,
     categoryDescription: String,
-    categoryId: Number
+    categoryId: Number,
   },
   data() {
     return {
       isHovered: false,
-      playerId: 1,
     };
   },
   methods: {
     async createNewGame() {
-  try {
-    // Vérifier si le joueur a déjà une partie dans cette catégorie
-    const existingGameResponse = await axios.get(`http://localhost:8090/parties/player/${this.playerId}/category/${this.categoryId}`);
-    
-    if (existingGameResponse.data) {
-      // Si une partie existe déjà, la supprimer
-      const gameIdToDelete = existingGameResponse.data.idPartie;
-      await axios.delete(`http://localhost:8090/parties/${gameIdToDelete}`);
-      console.log(`Existing game with ID ${gameIdToDelete} deleted.`);
+      const firebaseUserUid = localStorage.getItem("firebaseUserUid");
+      const categoryId = this.categoryId;
+
+      try {
+        // Check if the game already exists for the current category and user
+        const checkResponse = await axios.get(
+          `http://localhost:8090/parties/exists?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
+        );
+
+        if (checkResponse.data) {
+          // If the game exists, ask the user for confirmation
+          const userConfirmed = confirm("A game already exists for this category. Do you want to delete it and create a new one?");
+
+          if (userConfirmed) {
+            // Delete the existing game
+            await axios.delete(
+              `http://localhost:8090/parties/${checkResponse.data.id}`
+            );
+          }
+        }
+
+        // Create the new game
+        const response = await axios.post(
+          `http://localhost:8090/parties/createNewPartie?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
+        );
+
+        if (response.status === 201) {
+
+          this.$router.push({ path: `/game/${categoryId}` });
+        } else {
+          alert(`Unexpected response status: ${response.status}`);
+        }
+      } catch (error) {
+        console.error("Error:", error.message);
+        alert("An error occurred while creating a new game.");
+      }
     }
+    ,
+    async continueGame() {
+      const firebaseUserUid = localStorage.getItem("firebaseUserUid");
+      const categoryId = this.categoryId;
 
-    // Créer une nouvelle partie
-    const newGameResponse = await axios.post('http://localhost:8090/parties/save', {
-      levelReached: 1,
-      nbHeart: 3,
-      categorie: { idCategorie: this.categoryId },
-      player: { idPlayer: this.playerId }
-    });
-
-    console.log('New game created:', newGameResponse.data);
-  } catch (error) {
-    console.error('Error creating new game:', error);
-  }
-}
+      try {
+        // Check if the game exists for the current category and user
+        const checkResponse = await axios.get(
+          `http://localhost:8090/parties/exists?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
+        );
 
 
-,
-    continueGame() {
-      this.$emit('continue-selected', this.categoryId);
+        if (checkResponse.data) {
+          this.$router.push({ path: `/game/${categoryId}` });
+        } else {
+          alert("No game exists for this category.");
+        }
+      } catch (error) {
+        console.error("Error:", error.message);
+        alert("An error occurred while checking for an existing game.");
+      }
     }
-  }
+    ,
+  },
 };
 </script>
 
-
-
-<style>
+<style scoped>
 .category-description {
   margin-top: 50px;
 }
+
 .category-card {
   padding: 10px;
   margin-bottom: 10px;
@@ -78,15 +106,18 @@ export default {
   transition: 0.3s;
   font-family: "Lilita One", sans-serif;
 }
+
 .category-card:hover {
   transform: scale(1.04);
   box-shadow: 0px 0px 4px 1px rgb(65, 62, 62);
 }
+
 .category-name {
   font-weight: bold;
   color: #813405;
   font-size: 20px;
 }
+
 .options {
   background-color: #ffe5b4;
   padding: 5px;
@@ -98,6 +129,7 @@ export default {
   position: relative;
   top: -65px;
 }
+
 .options a {
   cursor: pointer;
   color: #582f0e;
@@ -108,6 +140,7 @@ export default {
   justify-content: center;
   transition: 0.3s;
 }
+
 .options a:hover {
   color: #fb6107;
   font-size: 19px;
