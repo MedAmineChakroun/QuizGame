@@ -3,8 +3,11 @@ import axios from "axios";
 class QuestionService {
   // Method to fetch questions based on category ID
   async fetchQuestions(categorieId) {
+    if (categorieId == null) {
+      return;
+    }
     const questionUrl = `http://localhost:8090/questions/category/${categorieId}`;
-    console.log(`Fetching questions from: ${questionUrl}`);
+
     try {
       const response = await axios.get(questionUrl);
       return response.data; // Return the questions
@@ -19,7 +22,6 @@ class QuestionService {
     const answerUrl = `http://localhost:8090/possibleAnswers/question/${questionId}`;
     try {
       const response = await axios.get(answerUrl);
-      console.log(response);
 
       return response.data; // Return the possible answers
     } catch (error) {
@@ -29,10 +31,9 @@ class QuestionService {
   }
   async fetchQuestionById(questionId) {
     const questionUrl = `http://localhost:8090/questions/${questionId}`;
-    console.log(`Fetching question from: ${questionUrl}`);
+
     try {
       const response = await axios.get(questionUrl);
-      console.log(response);
 
       return response.data; // Return the question
     } catch (error) {

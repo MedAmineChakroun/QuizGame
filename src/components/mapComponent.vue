@@ -8,7 +8,7 @@
     </div>
     <div class="levels-container">
       <levelComponent v-for="(level, i) in questions" :key="level.id" :categorieId="categorieId" :levelId="level.id"
-        :questionNumber="i" />
+        :questionNumber="i" :partieData="partieData" />
     </div>
     <div class="back-div">
       <a href="/#/categories" class="back-link">
@@ -41,6 +41,7 @@ export default {
       nbHeart: 3,
       questions: [],
       loading: true,
+      partieData: {}
     };
   },
   watch: {
@@ -68,9 +69,11 @@ export default {
       try {
         const response = await axios.get(`http://localhost:8090/parties/${partieId}`);
         const partieData = response.data;
-
         this.nbHeart = partieData.nbHeart; // Update nbHeart from partie data
-        this.fetchQuestions(this.categorieId); // Fetch questions after getting the heart value
+        this.partieData = partieData; // Ensure partieData is populated
+
+        // Fetch questions after getting the heart value and other data
+        this.fetchQuestions(this.categorieId);
       } catch (error) {
         console.error("Error fetching partie data:", error);
         this.loading = false;

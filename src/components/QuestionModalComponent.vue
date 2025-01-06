@@ -45,10 +45,6 @@
           </div>
         </div>
 
-        <!-- Character Container with images -->
-
-
-
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" @click="$emit('close')">Close</button>
         </div>
@@ -59,6 +55,7 @@
 
 <script>
 import QuestionService from "@/services/QuestionService"; // Adjust the path based on your folder structure
+import axios from "axios";
 
 export default {
   name: "QuestionModalComponent",
@@ -70,6 +67,10 @@ export default {
     isModalVisible: {
       type: Boolean,
 
+    },
+    partieData: {
+      type: Object,
+      required: true
     }
   },
   data() {
@@ -110,14 +111,46 @@ export default {
       }
       return array;
     },
-    checkAnswer(answer) {
-      if (answer === this.question.correctAnswer) {
-        console.log("Correct Answer!"); // Logs to console
-        alert("Correct Answer!"); // Displays a simple alert
-      } else {
-        console.log("Incorrect Answer."); // Logs to console
-        alert("Incorrect Answer."); // Displays a simple alert
+    //-------------------------->
+    async checkAnswer(answer) {
+      try {
+        if (answer === this.question.correctAnswer) {
+          this.unlockQuestion();
+          this.addGold(this.question.goldQuestion)
+        } else {
+          alert("Incorrect Answer.");
+        }
+      } catch (error) {
+        console.error("Error occurred while checking answer:", error);
+        alert("An error occurred while processing your answer. Please try again.");
       }
+    },
+    async addGold(gold) {
+      const playerId = this.partieData.player.id;
+
+      try {
+        // Fetch the current gold amount for the player
+        const response = await axios.get(`http://localhost:8090/players/${playerId}`);
+        const newAmount = gold + response.data.gold;
+
+        // Update the player's gold amount
+        await axios.put(`http://localhost:8090/players/${playerId}`, { "gold": newAmount });
+
+        // Optionally update the UI or emit an event to refresh the other component
+        console.log('Gold updated successfully:', newAmount);
+      } catch (error) {
+        // Log the error or handle it appropriately
+        console.error('An error occurred while updating gold:', error);
+      }
+    },
+    async unlockQuestion() {
+      const response = await axios.put(`http://localhost:8090/parties/${this.partieData.id}`, {
+        "questionReached": this.partieData.questionReached + 1
+      });
+      alert("Correct Answer!");
+
+      console.log("Question Reached:", response.data.questionReached);
+      //it show refetch the numbe
     }
   },
 };

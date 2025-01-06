@@ -1,7 +1,11 @@
 <template>
   <div class="level-component">
-    <h2 class="level" @click="openQuestionModal">{{ questionNumber + 1 }}</h2>
-    <QuestionModalComponent v-show="showModal" :levelId="levelId" @close="closeQuestionModal" />
+    <h2 class="level" @click="handleClick">
+      {{ questionNumber + 1 }}
+    </h2>
+
+    <QuestionModalComponent v-show="showModal" :levelId="levelId" @close="closeQuestionModal"
+      :partieData="partieData" />
   </div>
 </template>
 
@@ -26,11 +30,25 @@ export default {
     questionNumber: {
       type: Number,
       required: true
+    },
+    partieData: {
+      type: Object,
+      required: true
     }
   },
   methods: {
+    handleClick() {
+      // Only open modal if the question is unlocked
+      if ((this.questionNumber + 1) > this.partieData.questionReached) {
+        console.log("This question is locked. Cannot open modal.");
+        return;
+      }
+      this.openQuestionModal();
+    },
     openQuestionModal() {
       console.log("Opening modal...");
+      console.log("questionReached:", this.partieData.questionReached);
+      console.log("questionNumber:", this.questionNumber + 1);
       this.showModal = true;
     },
     closeQuestionModal() {
