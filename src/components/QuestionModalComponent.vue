@@ -1,6 +1,6 @@
 <template>
-  <div class="modal fade show" tabindex="-1" id="exampleModal" aria-labelledby="exampleModalLabel" aria-hidden="true"
-    style="display: block;">
+  <div class="modal fade show" tabindex="-1" id="exampleModal" aria-labelledby="exampleModalLabel"
+    :aria-hidden="isModalVisible ? 'false' : 'true'" v-show="isModalVisible" style="display: block;">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
@@ -53,6 +53,7 @@
   </div>
 </template>
 
+
 <script>
 import QuestionService from "@/services/QuestionService"; // Adjust the path based on your folder structure
 import axios from "axios";
@@ -70,6 +71,10 @@ export default {
     },
     partieData: {
       type: Object,
+      required: true
+    },
+    questionNumber: {
+      type: Number,
       required: true
     }
   },
@@ -115,8 +120,9 @@ export default {
     async checkAnswer(answer) {
       try {
         if (answer === this.question.correctAnswer) {
-          this.unlockQuestion();
           this.addGold(this.question.goldQuestion)
+          this.unlockQuestion();
+
         } else {
           alert("Incorrect Answer.");
         }
@@ -128,7 +134,12 @@ export default {
     async addGold(gold) {
       const playerId = this.partieData.player.id;
 
+      console.log("questionNumber", this.questionNumber, "/questionReached", this.partieData.questionReached);
+
       try {
+        if (this.questionNumber < this.partieData.questionReached) {
+          return;
+        }
         // Fetch the current gold amount for the player
         const response = await axios.get(`http://localhost:8090/players/${playerId}`);
         const newAmount = gold + response.data.gold;
@@ -136,19 +147,19 @@ export default {
         // Update the player's gold amount
         await axios.put(`http://localhost:8090/players/${playerId}`, { "gold": newAmount });
 
+        this.$store.commit("setGold", newAmount);
         // Optionally update the UI or emit an event to refresh the other component
-        console.log('Gold updated successfully:', newAmount);
+
       } catch (error) {
         // Log the error or handle it appropriately
         console.error('An error occurred while updating gold:', error);
       }
     },
     async unlockQuestion() {
+      alert("Correct Answer!");
       const response = await axios.put(`http://localhost:8090/parties/${this.partieData.id}`, {
         "questionReached": this.partieData.questionReached + 1
       });
-      alert("Correct Answer!");
-
       console.log("Question Reached:", response.data.questionReached);
       //it show refetch the numbe
     }

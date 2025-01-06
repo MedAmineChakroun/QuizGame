@@ -27,31 +27,15 @@
 
 <script>
 import "primeicons/primeicons.css";
-import axios from "axios";
 
 export default {
     name: "playerBarSection",
-    data() {
-        return {
-            gold: 0, // Default value
-        };
+    computed: {
+        gold() {
+            return this.$store.state.gold;
+        }
     },
-    methods: {
-        async fetchPlayerData() {
-            try {
-                const firebaseUserUid = localStorage.getItem("firebaseUserUid");
-                if (!firebaseUserUid) {
-                    console.error("Firebase User UID is missing from localStorage.");
-                    return;
-                }
-                const response = await axios.get(`http://localhost:8090/players/player/${firebaseUserUid}`);
-                this.gold = response.data.gold;
-            } catch (error) {
-                console.error("Error fetching player data:", error);
-            }
-        },
 
-    },
     watch: {
         gold(newValue, oldValue) {
             console.log(`Gold value changed from ${oldValue} to ${newValue}`);
@@ -59,9 +43,9 @@ export default {
         },
     },
     mounted() {
-        this.fetchPlayerData(); // Initial fetch
-        // Optionally set up a WebSocket or polling to update the gold dynamically.
-    },
+        this.$store.dispatch('fetchPlayerData'); // Dispatch the action to fetch player data
+    }
+
 };
 </script>
 

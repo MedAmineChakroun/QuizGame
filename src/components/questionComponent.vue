@@ -4,8 +4,8 @@
       {{ questionNumber + 1 }}
     </h2>
 
-    <QuestionModalComponent v-show="showModal" :levelId="levelId" @close="closeQuestionModal"
-      :partieData="partieData" />
+    <QuestionModalComponent v-show="showModal" :levelId="levelId" @close="closeQuestionModal" :partieData="partieData"
+      :questionNumber="questionNumber + 1" />
   </div>
 </template>
 
