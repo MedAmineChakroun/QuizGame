@@ -46,5 +46,6 @@ export default {
     background-repeat: no-repeat;
     height: 100vh;
     overflow: auto;
+    padding-right: -50px;
 }
 </style>

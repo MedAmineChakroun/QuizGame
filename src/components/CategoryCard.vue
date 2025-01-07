@@ -101,6 +101,11 @@ export default {
 }
 
 .category-card {
+  /*background-image: url('@/assets/history.jpg');
+  /* Replace with your image URL */
+  /*background-size: cover;
+  /* Ensures the image covers the entire card */
+  /*background-position: center;*/
   padding: 10px;
   margin-bottom: 10px;
   position: relative;

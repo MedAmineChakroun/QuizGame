@@ -4,7 +4,7 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Level {{ levelId }}</h5>
+          <h5 class="modal-title">Level {{ questionNumber }}</h5>
           <p v-if="question" class="gold-question">
             {{ question.goldQuestion }}
             <svg xmlns="http://www.w3.org/2000/svg" size="40" width="20" height="16" fill="currentColor"
@@ -16,6 +16,7 @@
             </svg>
           </p>
           <p v-else>Loading question...</p>
+
           <button type="button" class="btn-close" @click="$emit('close')" aria-label="Close"></button>
         </div>
 
@@ -46,6 +47,11 @@
         </div>
 
         <div class="modal-footer">
+          <div class="hearts-container">
+            <template v-for="i in nbHeart" :key="i">
+              <img class="heart-img" src="@/assets/heart.png" alt="Heart Icon" />
+            </template>
+          </div>
           <button type="button" class="btn btn-secondary" @click="$emit('close')">Close</button>
         </div>
       </div>
@@ -57,7 +63,7 @@
 <script>
 import QuestionService from "@/services/QuestionService"; // Adjust the path based on your folder structure
 import axios from "axios";
-
+import { mapState } from "vuex";
 export default {
   name: "QuestionModalComponent",
   props: {
@@ -69,13 +75,17 @@ export default {
       type: Boolean,
 
     },
-    partieData: {
-      type: Object,
-      required: true
-    },
     questionNumber: {
       type: Number,
       required: true
+    }
+  },
+  computed: {
+    ...mapState({
+      partieData: state => state.partieData,  // Access partieData from Vuex store
+    }),
+    nbHeart() {
+      return this.partieData.nbHeart;
     }
   },
   data() {
@@ -87,6 +97,11 @@ export default {
   },
   mounted() {
     this.loadQuestionAndAnswers()
+  },
+  watch: {
+    nbHeart() {
+      // if the nbHeart changes display a lotty file for a broken heart in the screen
+    }
   },
   methods: {
     async loadQuestionAndAnswers() {
@@ -119,16 +134,31 @@ export default {
     //-------------------------->
     async checkAnswer(answer) {
       try {
+
         if (answer === this.question.correctAnswer) {
+          alert("Correct Answer!");
+          if (this.questionNumber < this.partieData.questionReached) {
+            this.$emit('close');
+            return;
+          }
           this.addGold(this.question.goldQuestion)
-          this.unlockQuestion();
+          if (this.partieData.categorie.questions.length === this.partieData.questionReached) {
+            this.handleWin();
+          } else {
+            this.unlockQuestion();
+            this.$emit('close');
+          }
 
         } else {
           alert("Incorrect Answer.");
+          if (this.questionNumber < this.partieData.questionReached) {
+            return;
+          }
+          this.handleIncorrectAnswer();
+
         }
       } catch (error) {
         console.error("Error occurred while checking answer:", error);
-        alert("An error occurred while processing your answer. Please try again.");
       }
     },
     async addGold(gold) {
@@ -156,18 +186,97 @@ export default {
       }
     },
     async unlockQuestion() {
-      alert("Correct Answer!");
-      const response = await axios.put(`http://localhost:8090/parties/${this.partieData.id}`, {
-        "questionReached": this.partieData.questionReached + 1
-      });
-      console.log("Question Reached:", response.data.questionReached);
-      //it show refetch the numbe
+      try {
+
+
+        const response = await axios.put(`http://localhost:8090/parties/${this.partieData.id}`, {
+          "questionReached": this.partieData.questionReached + 1,
+          "nbHeart": this.partieData.nbHeart
+        });
+
+        // Commit the updated partieData to Vuex
+        this.$store.commit("setPartieData", response.data);
+        console.log("Question Reached:", response.data.questionReached);
+
+      } catch (error) {
+        // Handle any error that occurs during the request or response
+        console.error("Error updating question reached:", error);
+        alert("An error occurred while updating the question.");
+      }
+    },
+    async handleIncorrectAnswer() {
+      try {
+        const currentNbHeart = this.partieData.nbHeart;
+
+        // Decrement heart count, ensuring it does not go below 0
+        const newNbHeart = Math.max(0, currentNbHeart - 1);
+
+        // Only update API if there are changes to make
+        if (newNbHeart !== currentNbHeart) {
+          const response = await axios.put(`http://localhost:8090/parties/${this.partieData.id}`, {
+            "nbHeart": newNbHeart,
+            "questionReached": this.partieData.questionReached,
+          });
+
+          // Commit API response to Vuex
+          this.$store.commit("setPartieData", response.data);
+
+        }
+
+        // Handle game over condition
+        if (newNbHeart <= 0) {
+          this.handleGameOver();
+        }
+
+      } catch (error) {
+        console.error("Error updating heart count:", error);
+        alert("An error occurred while updating your heart count. Please try again.");
+      }
+    },
+
+
+    async handleGameOver() {
+      await axios.delete(`http://localhost:8090/parties/${this.partieData.id}`);
+      this.$router.push({ path: `/defeat` });
+    },
+    async handleWin() {
+      await axios.delete(`http://localhost:8090/parties/${this.partieData.id}`);
+      this.$router.push({ path: `/victory` });
+      return
     }
-  },
+  }
 };
 </script>
 
 <style>
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.heart-img {
+  width: 50px;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.heart-img:hover {
+  transform: scale(1.07);
+}
+
+.hearts-container {
+  display: flex;
+  flex-direction: row !important;
+  justify-content: center;
+  align-items: center;
+  display: inline-block;
+  padding: 7px 7px;
+  border-radius: 30px;
+  border: 3px solid white;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
 .gold-question {
   display: flex;
   align-items: center;

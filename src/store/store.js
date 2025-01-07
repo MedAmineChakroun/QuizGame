@@ -4,10 +4,14 @@ import axios from "axios";
 const store = createStore({
   state: {
     gold: 0,
+    partieData: {},
   },
   mutations: {
     setGold(state, amount) {
       state.gold = amount;
+    },
+    setPartieData(state, data) {
+      state.partieData = data;
     },
   },
   actions: {
@@ -24,6 +28,17 @@ const store = createStore({
         commit("setGold", response.data.gold);
       } catch (error) {
         console.error("Error fetching player data:", error);
+      }
+    },
+    async fetchPartieData({ commit }, partieId) {
+      try {
+        const response = await axios.get(
+          `http://localhost:8090/parties/${partieId}`
+        );
+        commit("setPartieData", response.data);
+        console.log("Partie data:", response.data);
+      } catch (error) {
+        console.error("Error fetching partie data:", error);
       }
     },
   },

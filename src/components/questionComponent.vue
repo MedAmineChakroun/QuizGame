@@ -1,16 +1,18 @@
 <template>
   <div class="level-component">
-    <h2 class="level" @click="handleClick">
+    <h2 class="level" @click="handleClick"
+      :class="{ 'custom-style': questionNumber + 1 === partieData.questionReached }">
       {{ questionNumber + 1 }}
     </h2>
 
-    <QuestionModalComponent v-show="showModal" :levelId="levelId" @close="closeQuestionModal" :partieData="partieData"
+    <QuestionModalComponent v-show="showModal" :levelId="levelId" @close="closeQuestionModal"
       :questionNumber="questionNumber + 1" />
   </div>
 </template>
 
 <script>
 import QuestionModalComponent from './QuestionModalComponent.vue';
+import { mapState } from "vuex";
 
 export default {
   name: "questionComponent",
@@ -22,6 +24,11 @@ export default {
       showModal: false,
     };
   },
+  computed: {
+    ...mapState({
+      partieData: state => state.partieData,  // Access partieData from Vuex store
+    })
+  },
   props: {
     levelId: {
       type: Number,
@@ -29,10 +36,6 @@ export default {
     },
     questionNumber: {
       type: Number,
-      required: true
-    },
-    partieData: {
-      type: Object,
       required: true
     }
   },
@@ -46,13 +49,9 @@ export default {
       this.openQuestionModal();
     },
     openQuestionModal() {
-      console.log("Opening modal...");
-      console.log("questionReached:", this.partieData.questionReached);
-      console.log("questionNumber:", this.questionNumber + 1);
       this.showModal = true;
     },
     closeQuestionModal() {
-      console.log("Closing modal...");
       this.showModal = false;
     }
   }
@@ -74,6 +73,7 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
 .level:hover {
@@ -87,5 +87,29 @@ export default {
 .level p {
   margin: 0;
   font-size: 12px;
+}
+
+.custom-style {
+  background-color: #ff5400;
+  /* Highlight with a yellow background */
+  border: 3px solid #582707;
+  /* Orange border */
+  animation: pulse 1s infinite;
+  /* Add a pulsing animation for extra effect */
+  color: #ffffff;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 </style>

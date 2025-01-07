@@ -8,7 +8,7 @@
     </div>
     <div class="levels-container">
       <levelComponent v-for="(level, i) in questions" :key="level.id" :categorieId="categorieId" :levelId="level.id"
-        :questionNumber="i" :partieData="partieData" />
+        :questionNumber="i" />
     </div>
     <div class="back-div">
       <a href="/#/categories" class="back-link">
@@ -22,7 +22,6 @@
 import playerBarSection from './playerBarSection.vue';
 import levelComponent from './questionComponent.vue';
 import QuestionService from '@/services/QuestionService';
-import axios from 'axios';
 
 export default {
   name: "mapComponent",
@@ -36,12 +35,23 @@ export default {
       required: true
     }
   },
+  computed: {
+    // Access partieData directly from Vuex store
+    partieData() {
+      return this.$store.state.partieData;
+    },
+    nbHeart() {
+      return this.partieData.nbHeart;
+    },
+    questionReached() {
+      return this.partieData.questionReached;
+    }
+
+  },
   data() {
     return {
-      nbHeart: 3,
       questions: [],
-      loading: true,
-      partieData: {}
+      loading: true
     };
   },
   watch: {
@@ -67,12 +77,8 @@ export default {
     },
     async fetchPartieData(partieId) {
       try {
-        const response = await axios.get(`http://localhost:8090/parties/${partieId}`);
-        const partieData = response.data;
-        this.nbHeart = partieData.nbHeart; // Update nbHeart from partie data
-        this.partieData = partieData; // Ensure partieData is populated
 
-        // Fetch questions after getting the heart value and other data
+        this.$store.dispatch('fetchPartieData', partieId);
         this.fetchQuestions(this.categorieId);
       } catch (error) {
         console.error("Error fetching partie data:", error);
