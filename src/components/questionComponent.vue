@@ -90,9 +90,9 @@ export default {
 }
 
 .custom-style {
-  background-color: #ff5400;
+  background-color: #ff6000;
   /* Highlight with a yellow background */
-  border: 3px solid #582707;
+  border: 2px solid #ffffff;
   /* Orange border */
   animation: pulse 1s infinite;
   /* Add a pulsing animation for extra effect */
