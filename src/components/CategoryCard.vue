@@ -1,7 +1,6 @@
 <template>
   <div class="category-card" @mouseover="isHovered = true" @mouseleave="isHovered = false">
     <div class="category-name">{{ categoryName }}</div>
-    <div class="category-description">{{ categoryDescription }}</div>
     <div v-if="isHovered" class="options">
       <a href="javascript:void(0)" @click="createNewGame">New Game</a>
       <a href="javascript:void(0)" @click="continueGame">Continue</a>
@@ -11,7 +10,8 @@
 
 <script>
 import axios from 'axios';
-
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 export default {
   name: "CategoryCard",
   props: {
@@ -43,6 +43,7 @@ export default {
             // If the user cancels, simply return and do not create a new game
             return; // Exit the function early
           }
+
 
           // If the user confirmed, delete the existing game
           await axios.delete(
@@ -83,7 +84,11 @@ export default {
         if (checkResponse.data) {
           this.$router.push({ path: `/game/${partieId}` });
         } else {
-          alert("No game exists for this category.");
+          toast.error("No game exists for this category.", {
+            position: "top-center", // You can change position as needed
+            autoClose: 3000,
+            hideProgressBar: true,
+          });
         }
       } catch (error) {
         console.error("Error:", error.message);
@@ -96,63 +101,98 @@ export default {
 </script>
 
 <style scoped>
-.category-description {
-  margin-top: 50px;
-}
-
 .category-card {
-  /*background-image: url('@/assets/history.jpg');
-  /* Replace with your image URL */
-  /*background-size: cover;
-  /* Ensures the image covers the entire card */
-  /*background-position: center;*/
+  background-color: #fdf0d5;
+  /* Vibrant background color */
+
   padding: 10px;
   margin-bottom: 10px;
   position: relative;
   width: 400px;
   height: 200px;
-  border-radius: 8px;
-  background-color: #fdf0d5;
-  transition: 0.3s;
+  border-radius: 12px;
+  /* Smooth edges */
+  transition: transform 0.3s, box-shadow 0.3s;
+  /* Smooth transitions */
   font-family: "Lilita One", sans-serif;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  /* Subtle shadow for 3D effect */
+  overflow: hidden;
+  /* Ensure content doesn't overflow the card */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .category-card:hover {
-  transform: scale(1.04);
-  box-shadow: 0px 0px 4px 1px rgb(65, 62, 62);
+  transform: scale(1.06) translateY(-5px);
+  /* Slight hover lift */
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+  /* Enhanced shadow on hover */
 }
 
 .category-name {
-  font-weight: bold;
-  color: #813405;
-  font-size: 20px;
+  font-size: 36px;
+  color: #772f1a;
+  /* Subtle text shadow */
+  text-align: center;
+  z-index: 1;
+  /* Keep the category name above the options */
+  transition: opacity 0.3s;
+  /* Smooth fade-out effect */
 }
 
 .options {
-  background-color: #ffe5b4;
-  padding: 5px;
+  background-color: rgba(0, 0, 0, 0.7);
+  /* Semi-transparent background */
+  color: white;
   display: flex;
   flex-direction: row;
-  column-gap: 10px;
-  border-radius: 6px;
-  height: 80%;
-  position: relative;
-  top: -65px;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  /* Match the card's border radius */
+  opacity: 0;
+  /* Hidden by default */
+  z-index: 2;
+  /* Position above the category name */
+  transition: opacity 0.3s;
+  /* Smooth fade-in effect */
+  gap: 10px;
+}
+
+.category-card:hover .options {
+  opacity: 1;
+  /* Show the options on hover */
+}
+
+.category-card:hover .category-name {
+  opacity: 0;
+  /* Hide the category name on hover */
 }
 
 .options a {
   cursor: pointer;
-  color: #582f0e;
+  color: white;
   text-decoration: none;
-  width: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.3s;
+  font-weight: bold;
+  margin: 10px 0;
+  padding: 10px 20px;
+  background-color: #fb6107;
+  /* Button background color */
+  border-radius: 6px;
+  transition: transform 0.3s, background-color 0.3s;
 }
 
 .options a:hover {
-  color: #fb6107;
-  font-size: 19px;
+  background-color: #ff8800;
+  /* Change button color on hover */
+  transform: scale(1.1);
+  /* Slight hover effect */
 }
 </style>

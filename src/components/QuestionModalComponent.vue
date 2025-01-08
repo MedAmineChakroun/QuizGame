@@ -59,6 +59,8 @@
 import QuestionService from "@/services/QuestionService"; // Adjust the path based on your folder structure
 import axios from "axios";
 import { mapState } from "vuex";
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 export default {
   name: "QuestionModalComponent",
   props: {
@@ -132,7 +134,14 @@ export default {
       try {
 
         if (answer === this.question.correctAnswer) {
-          alert("Correct Answer!");
+          //toast
+          toast.success('Correct Answer', {
+            autoClose: 2000,
+            hideProgressBar: true,
+            position: "bottom-right",
+            transition: 'bounce'
+          });
+
           if (this.questionNumber < this.partieData.questionReached) {
             this.$emit('close');
             return;
@@ -224,7 +233,12 @@ export default {
           this.$store.commit("setPartieData", response.data);
 
         }
-
+        toast.error('Oops!', {
+          autoClose: 2000,
+          hideProgressBar: true,
+          position: "bottom-right",
+          transition: 'bounce'
+        });
         // Handle game over condition
         if (newNbHeart <= 0) {
           this.handleGameOver();

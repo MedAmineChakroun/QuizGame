@@ -10,11 +10,6 @@
       <levelComponent v-for="(level, i) in questions" :key="level.id" :categorieId="categorieId" :levelId="level.id"
         :questionNumber="i" />
     </div>
-    <div class="back-div">
-      <a href="/#/categories" class="back-link">
-        <span class="back-icon">&lt;</span> Back
-      </a>
-    </div>
   </div>
 </template>
 
@@ -99,30 +94,6 @@ export default {
 </script>
 
 <style scoped>
-.back-link {
-  text-decoration: none;
-  color: white;
-  font-family: "Lilita One", sans-serif;
-  display: flex;
-  align-items: center;
-  font-size: 30px;
-  transition: 0.3s;
-}
-
-.back-icon {
-  margin-right: 5px;
-}
-
-.back-div {
-  position: fixed;
-  top: 170px;
-  margin-left: 70px;
-}
-
-.back-div:hover a {
-  transform: scale(1.05);
-}
-
 .heart-img {
   width: 60px;
   transition: 0.3s;
@@ -163,5 +134,6 @@ export default {
   max-width: 900px;
   margin: auto;
   margin-top: 100px;
+  margin-bottom: 100px;
 }
 </style>

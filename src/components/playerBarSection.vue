@@ -1,6 +1,9 @@
 <template>
     <div class="playerBarSection">
         <div class="leftDiv">
+            <div class="exitDiv">
+                <a href="/#/categories"> <i class="pi pi-sign-out" style="font-size: 2rem"></i></a>
+            </div>
             <div class="profilDiv">
                 <a href="/#/profil">
                     <i class="pi pi-user" style="font-size: 2rem"></i>
@@ -14,6 +17,7 @@
                 <a href="/#/settings"><i class="pi pi-cog" style="font-size: 2rem"></i></a>
 
             </div>
+
         </div>
         <div class="rightDiv">
             <div class="coinsDiv">
@@ -40,8 +44,9 @@ export default {
         gold(newValue, oldValue) {
             console.log(`Gold value changed from ${oldValue} to ${newValue}`);
             // Perform any action needed when gold changes, like animations or notifications.
-        },
+        }
     },
+
     mounted() {
         this.$store.dispatch('fetchPlayerData'); // Dispatch the action to fetch player data
     }
