@@ -47,6 +47,7 @@
               <img class="heart-img" src="@/assets/heart.png" alt="Heart Icon" />
             </template>
           </div>
+          <HintsComponent />
           <button type="button" class="btn btn-secondary" @click="$emit('close')">Close</button>
         </div>
       </div>
@@ -61,8 +62,13 @@ import axios from "axios";
 import { mapState } from "vuex";
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
+import HintsComponent from "./HintsComponent.vue"; // Import the Hints component
+
 export default {
   name: "QuestionModalComponent",
+  components: {
+    HintsComponent
+  },
   props: {
     levelId: {
       type: Number,
@@ -147,11 +153,15 @@ export default {
             return;
           }
           this.addGold(this.question.goldQuestion)
-          if (this.partieData.categorie.questions.length === this.partieData.questionReached) {
+
+          if (this.partieData.categorie.questionsCount === this.partieData.questionReached) {
+
             this.handleWin();
           } else {
             this.unlockQuestion();
+
             this.$emit('close');
+
           }
 
         } else {
