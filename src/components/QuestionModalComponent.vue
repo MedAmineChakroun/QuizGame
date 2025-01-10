@@ -27,9 +27,10 @@
                   {{ question.content }}
                 </h1>
                 <div class="answers-container">
-                  <div v-for="(answer, index) in possibleAnswers" :key="index" class="answer"
-                    :class="{ 'wrong-answer': wrongAnswers.includes(answer.possibleAnswer) }"
-                    @click="checkAnswer(answer.possibleAnswer)">
+                  <div v-for="(answer, index) in possibleAnswers" :key="index" class="answer" :class="{
+                    'wrong-answer': wrongAnswers.includes(answer.possibleAnswer),
+                    'correct-answer': answer.possibleAnswer === correctAnswer
+                  }" @click="checkAnswer(answer.possibleAnswer)">
                     <div class="possible">{{ answer.possibleAnswer }}</div>
                   </div>
                 </div>
@@ -47,7 +48,8 @@
               <img class="heart-img" src="@/assets/heart.png" alt="Heart Icon" />
             </template>
           </div>
-          <HintsComponent />
+          <HintsComponent @removeTwoWrongAnswers="handleRemoveTwoWrongAnswers"
+            @revealCorrectAnswer="handleRevealCorrectAnswer" />
           <button type="button" class="btn btn-secondary" @click="$emit('close')">Close</button>
         </div>
       </div>
@@ -97,6 +99,7 @@ export default {
       possibleAnswers: [],
       loading: false,
       wrongAnswers: [],
+      correctAnswer: null
     };
   },
   mounted() {
@@ -269,7 +272,92 @@ export default {
       await axios.delete(`http://localhost:8090/parties/${this.partieData.id}`);
       this.$router.push({ path: `/victory` });
       return
+    },
+    //-------------------------->
+    async handleRemoveTwoWrongAnswers() {
+      try {
+        // Update remaining hints on the backend
+        if (this.wrongAnswers.length >= 2) {
+          toast.info('You have already removed 2 options', {
+            autoClose: 2000,
+            hideProgressBar: true,
+            position: "bottom-right",
+            transition: 'bounce'
+          });
+          return;
+        }
+        if (this.correctAnswer) {
+          toast.info('You have already revealed the correct answer :)', {
+            autoClose: 2000,
+            hideProgressBar: true,
+            position: "bottom-right",
+            transition: 'bounce'
+          });
+          return;
+        }
+        await axios.put(
+          `http://localhost:8090/hints/${this.partieData.hints[0].id}`,
+          {
+            remainingHints: this.partieData.hints[0].remainingHints - 1,
+          }
+        );
+
+        // Tell the store to refetch the data
+        await this.$store.dispatch("fetchPartieData", this.partieData.id);
+
+        // Filter out the correct answer from the possible answers
+        const incorrectAnswers = this.possibleAnswers.filter(
+          (answer) => answer.possibleAnswer !== this.question.correctAnswer
+        );
+
+        // Shuffle the incorrect answers to randomize selection
+        const shuffledIncorrectAnswers = this.shuffleAnswers(incorrectAnswers);
+
+        // Select two random wrong answers
+        const randomWrongAnswers = shuffledIncorrectAnswers.slice(0, 2).map(
+          (answer) => answer.possibleAnswer
+        );
+
+        // Add the selected answers to the wrongAnswers array
+        this.wrongAnswers = [...this.wrongAnswers, ...randomWrongAnswers];
+
+        console.log("Updated wrongAnswers:", this.wrongAnswers);
+      } catch (error) {
+        console.error("Error updating hints:", error);
+        alert("An error occurred while using the hint. Please try again.");
+      }
+    },
+    async handleRevealCorrectAnswer() {
+      try {
+        // Update remaining hints on the backend
+        if (this.correctAnswer) {
+          toast.info('You have already revealed the correct answer :)', {
+            autoClose: 2000,
+            hideProgressBar: true,
+            position: "bottom-right",
+            transition: 'bounce'
+          });
+          return;
+        }
+        await axios.put(
+          `http://localhost:8090/hints/${this.partieData.hints[1].id}`,
+          {
+            remainingHints: this.partieData.hints[1].remainingHints - 1,
+          }
+        );
+
+        // Tell the store to refetch the data
+        await this.$store.dispatch("fetchPartieData", this.partieData.id);
+
+        //add custom style to the correct answer
+        this.correctAnswer = this.question.correctAnswer;
+
+      } catch (error) {
+        console.error("Error updating hints:", error);
+        alert("An error occurred while using the hint. Please try again.");
+      }
     }
+
   }
 };
 </script>
@@ -414,5 +502,13 @@ export default {
 
 .wrong-answer:hover {
   transform: scale(1);
+}
+
+.correct-answer {
+  background-color: #7cb518;
+  /* Light green background */
+  color: white;
+
+  transition: background-color 0.3s ease-in-out;
 }
 </style>

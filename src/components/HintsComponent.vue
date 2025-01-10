@@ -15,7 +15,9 @@
 </template>
 
 <script>
+import { toast } from 'vue3-toastify';
 import { mapState } from "vuex";
+import 'vue3-toastify/dist/index.css';
 
 export default {
     name: 'HintsComponent',
@@ -41,15 +43,38 @@ export default {
             ];
             return hints[n - 1] || "Unknown ability";
         },
-        handleRemoveTwoWrongAnswers() {
-            console.log("Implement the logic to remove two wrong answers");
+        async handleRemoveTwoWrongAnswers() {
+            if (this.partieData.hints[0].remainingHints > 0) {
+                this.$emit("removeTwoWrongAnswers");
+            } else {
+                toast.info('You already used this hint!', {
+                    autoClose: 2000,
+                    hideProgressBar: true,
+                    position: "bottom-right",
+                    transition: 'bounce'
+                });
+            }
 
         },
         handleRevealCorrectAnswer() {
-            console.log("Implement the logic to reveal correct answer");
+            if (this.partieData.hints[1].remainingHints > 0) {
+                this.$emit("revealCorrectAnswer");
+            } else {
+                toast.info('You already used this hint!', {
+                    autoClose: 2000,
+                    hideProgressBar: true,
+                    position: "bottom-right",
+                    transition: 'bounce'
+                });
+            }
         },
         handleAiHint() {
-            console.log("Implement the logic to ai help");
+            toast.info('comming soon!', {
+                autoClose: 2000,
+                hideProgressBar: true,
+                position: "bottom-right",
+                transition: 'bounce'
+            });
         },
     },
     computed: {
