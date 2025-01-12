@@ -7,6 +7,10 @@
       </template>
     </div>
     <div class="levels-container">
+      <!-- Display loading indicator if questions are still being fetched -->
+      <div v-if="loading" class="loading-indicator">
+        Loading questions...
+      </div>
       <levelComponent v-for="(level, i) in questions" :key="level.id" :categorieId="categorieId" :levelId="level.id"
         :questionNumber="i" />
     </div>
@@ -52,8 +56,8 @@ export default {
   watch: {
     // Watch for changes in categorieId
     categorieId(newCategorieId) {
-      if (newCategorieId) {
-        this.fetchQuestions(newCategorieId);
+      if (newCategorieId !== 0) {
+        this.fetchQuestions(newCategorieId); // Fetch questions only when categorieId is valid
       }
     },
     // Watch for changes in partieId to fetch the nbHeart value
@@ -61,22 +65,27 @@ export default {
   },
   methods: {
     async fetchQuestions(categorieId) {
+      // Wait until categorieId is valid
+      if (categorieId === 0) {
+        console.log('Waiting for valid categorieId...');
+        return; // Do nothing until categorieId is valid
+      }
+
       try {
         this.loading = true;
         this.questions = await QuestionService.fetchQuestions(categorieId);
         this.loading = false;
       } catch (error) {
-        console.error("Error fetching questions:", error);
+        console.error('Error fetching questions:', error);
         this.loading = false;
       }
     },
     async fetchPartieData(partieId) {
       try {
-
         this.$store.dispatch('fetchPartieData', partieId);
         this.fetchQuestions(this.categorieId);
       } catch (error) {
-        console.error("Error fetching partie data:", error);
+        console.error('Error fetching partie data:', error);
         this.loading = false;
       }
     }

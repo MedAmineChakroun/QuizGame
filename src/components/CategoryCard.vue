@@ -12,6 +12,8 @@
 import axios from 'axios';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
+import { mapState } from "vuex";
+
 export default {
   name: "CategoryCard",
   props: {
@@ -24,7 +26,16 @@ export default {
       isHovered: false,
     };
   },
+  computed: {
+    ...mapState({
+      partieData: state => state.partieData,  // Access partieData from Vuex store
+    }),
+    ...mapState({
+      history: state => state.history,  // Access history from Vuex store
+    }),
+  },
   methods: {
+    // Function to check if the game already exists for the current player and category
     async createNewGame() {
       const firebaseUserUid = localStorage.getItem("firebaseUserUid");
       const categoryId = this.categoryId;
@@ -36,14 +47,13 @@ export default {
         );
 
         if (checkResponse.data) {
-          // If the game exists, ask the user for confirmation
+          // If the game exists, ask the user for confirmation to delete the old game
           const userConfirmed = confirm("A game already exists for this category. Do you want to delete it and create a new one?");
 
           if (!userConfirmed) {
             // If the user cancels, simply return and do not create a new game
-            return; // Exit the function early
+            return;
           }
-
 
           // If the user confirmed, delete the existing game
           await axios.delete(
@@ -51,20 +61,30 @@ export default {
           );
         }
 
-        // Create the new game
+        // Now create the new game
         const response = await axios.post(
           `http://localhost:8090/parties/createNewPartie?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
         );
 
         if (response.status === 201) {
           const partieId = response.data.id;
+          this.$store.commit("setPartieData", response.data);
+
+
+          await this.$store.dispatch("fetchHistory", {
+            playerId: this.partieData.player.id,
+            categorieId: this.partieData.categorie.id,
+          });
+
+          // Redirect to the new game page
           this.$router.push({ path: `/game/${partieId}` });
         } else {
           alert(`Unexpected response status: ${response.status}`);
         }
       } catch (error) {
-        console.error("Error:", error.message);
+
         alert("An error occurred while creating a new game.");
+
       }
     }
 
@@ -82,6 +102,11 @@ export default {
         const partieId = checkResponse.data.id;
 
         if (checkResponse.data) {
+
+          await this.$store.dispatch("fetchHistory", {
+            playerId: this.partieData.player.id,
+            categorieId: this.partieData.categorie.id,
+          });
           this.$router.push({ path: `/game/${partieId}` });
         } else {
           toast.error("No game exists for this category.", {

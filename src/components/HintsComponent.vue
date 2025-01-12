@@ -37,7 +37,7 @@ export default {
         },
         getHint(n) {
             const hints = [
-                "remove to wrong answers.",
+                "remove 2 wrong answers.",
                 "reveal the correct answer.",
                 "Helpful hint from AI!",
             ];
@@ -69,7 +69,7 @@ export default {
             }
         },
         handleAiHint() {
-            toast.info('comming soon!', {
+            toast.info('AI is Coming soon!', {
                 autoClose: 2000,
                 hideProgressBar: true,
                 position: "bottom-right",

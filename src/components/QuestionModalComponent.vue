@@ -5,12 +5,14 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Level {{ questionNumber }}</h5>
-          <p v-if="question" class="gold-question">
+          <p v-if="question && canPlayerWinGold" class="gold-question">
             {{ question.goldQuestion }}
             <img src="@/assets/coin.png" alt="Gold Icon" class="coin" />
           </p>
-          <p v-else>Loading question...</p>
-
+          <p v-else class="gold-question">
+            0
+            <img src="@/assets/coin.png" alt="Gold Icon" class="coin" />
+          </p>
           <button type="button" class="btn-close" @click="$emit('close')" aria-label="Close"></button>
         </div>
 
@@ -91,6 +93,15 @@ export default {
     }),
     nbHeart() {
       return this.partieData.nbHeart;
+    },
+    ...mapState({
+      history: state => state.history,
+    }),
+    MaxQuestionReached() {
+      return this.history.maxQuestionReached || 0;
+    },
+    canPlayerWinGold() {
+      return this.questionNumber >= this.partieData.questionReached && this.partieData.questionReached > this.MaxQuestionReached;
     }
   },
   data() {
@@ -111,6 +122,7 @@ export default {
     }
   },
   methods: {
+
     async loadQuestionAndAnswers() {
       try {
         this.loading = true; // Show loading indicator
@@ -188,10 +200,11 @@ export default {
     async addGold(gold) {
       const playerId = this.partieData.player.id;
 
-      console.log("questionNumber", this.questionNumber, "/questionReached", this.partieData.questionReached);
 
       try {
-        if (this.questionNumber < this.partieData.questionReached) {
+        const max = this.history.maxQuestionReached || 0;
+
+        if (this.questionNumber < this.partieData.questionReached || this.partieData.questionReached <= max) {
           return;
         }
         // Fetch the current gold amount for the player
@@ -211,8 +224,6 @@ export default {
     },
     async unlockQuestion() {
       try {
-
-
         const response = await axios.put(`http://localhost:8090/parties/${this.partieData.id}`, {
           "questionReached": this.partieData.questionReached + 1,
           "nbHeart": this.partieData.nbHeart
@@ -220,7 +231,7 @@ export default {
 
         // Commit the updated partieData to Vuex
         this.$store.commit("setPartieData", response.data);
-        console.log("Question Reached:", response.data.questionReached);
+
 
       } catch (error) {
         // Handle any error that occurs during the request or response
@@ -265,10 +276,20 @@ export default {
 
 
     async handleGameOver() {
+      //register the game progress in history table
+      this.RegisterProgressInHistory();
+
+
       await axios.delete(`http://localhost:8090/parties/${this.partieData.id}`);
+
+
       this.$router.push({ path: `/defeat` });
     },
     async handleWin() {
+
+      //register the game progress in history table
+      this.RegisterProgressInHistory();
+
       await axios.delete(`http://localhost:8090/parties/${this.partieData.id}`);
       this.$router.push({ path: `/victory` });
       return
@@ -321,7 +342,7 @@ export default {
         // Add the selected answers to the wrongAnswers array
         this.wrongAnswers = [...this.wrongAnswers, ...randomWrongAnswers];
 
-        console.log("Updated wrongAnswers:", this.wrongAnswers);
+
       } catch (error) {
         console.error("Error updating hints:", error);
         alert("An error occurred while using the hint. Please try again.");
@@ -356,9 +377,74 @@ export default {
         console.error("Error updating hints:", error);
         alert("An error occurred while using the hint. Please try again.");
       }
+    },
+    async RegisterProgressInHistory() {
+      try {
+        await this.$store.dispatch("fetchHistory", {
+          playerId: this.partieData.player.id,
+          categorieId: this.partieData.categorie.id,
+        });
+
+        if (!this.history.id) { // Check if history doesn't exist or id is missing
+          // Create new history
+          this.createHistory(this.partieData.player.id, this.partieData.categorie.id);
+        } else {
+          // Update existing history
+          this.updateHistory();
+        }
+      } catch (error) {
+        console.error("Error registering progress in history:", error);
+        alert("An error occurred while registering your progress in history. Please try again.");
+      }
+    },
+
+    async createHistory(playerId, categorieId) {
+      try {
+        const goldEarned = this.partieData.questionReached * 50;
+        const response = await axios.post(
+          `http://localhost:8090/histories?playerId=${playerId}&categorieId=${categorieId}`,
+          {
+            goldEarned: goldEarned,
+            maxQuestionReached: this.partieData.questionReached
+          }
+        );
+
+        console.log('History created:', response.data);
+        // You can now commit this new history to the store if needed
+        this.$store.commit("setHistory", response.data);
+      } catch (error) {
+        console.error("Error creating history:", error);
+        alert("An error occurred while creating history. Please try again.");
+      }
+    }
+    ,
+    async updateHistory() {
+      if (this.maxQuestionReached >= this.partieData.questionReached) {
+        return;
+      }
+
+      let goldEarned = this.partieData.questionReached * 50;
+
+      if (this.nbHeart === 0) {
+        goldEarned -= 50;
+      }
+
+      const response = await axios.put(
+        `http://localhost:8090/histories/${this.history.id}`,
+        {
+          "goldEarned": goldEarned,
+          "maxQuestionReached": this.partieData.questionReached
+        }
+      );
+      this.$store.dispatch("fetchHistory", {
+        playerId: this.partieData.player.id,
+        categorieId: this.partieData.categorie.id,
+      });
+      console.log('updated History:', response.data);
     }
 
-  }
+  },
+
 };
 </script>
 

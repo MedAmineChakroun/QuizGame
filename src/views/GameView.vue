@@ -1,7 +1,7 @@
 <template>
     <div class="game-view">
         <navBar />
-        <mapComponent :categorieId="categorieId" />
+        <mapComponent :categorieId="categorieId || 0" />
     </div>
 </template>
 
@@ -23,12 +23,11 @@ export default {
     },
     async mounted() {
         const partieId = this.$route.params.partieId; // Retrieve partieId from route params
-        console.log(partieId);
 
         try {
             // Fetch the party details to get the categorieId
             const response = await axios.get(`http://localhost:8090/parties/${partieId}`);
-            console.log(response.data.categorie.id);
+
             this.categorieId = response.data.categorie.id; // Assign categorieId from response
         } catch (error) {
             console.error("Error fetching partie data:", error);

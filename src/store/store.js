@@ -5,6 +5,7 @@ const store = createStore({
   state: {
     gold: 0,
     partieData: {},
+    history: {},
   },
   mutations: {
     setGold(state, amount) {
@@ -12,6 +13,9 @@ const store = createStore({
     },
     setPartieData(state, data) {
       state.partieData = data;
+    },
+    setHistory(state, data) {
+      state.history = data;
     },
   },
   actions: {
@@ -36,9 +40,26 @@ const store = createStore({
           `http://localhost:8090/parties/${partieId}`
         );
         commit("setPartieData", response.data);
-        console.log("Partie data:", response.data);
       } catch (error) {
         console.error("Error fetching partie data:", error);
+      }
+    },
+    async fetchHistory({ commit }, { playerId, categorieId }) {
+      try {
+        const response = await axios.get(
+          `http://localhost:8090/histories/player/${playerId}/category/${categorieId}`
+        );
+
+        if (response.data && response.data.id) {
+          // If the history exists, set it in the store
+          commit("setHistory", response.data);
+        } else {
+          // If the history doesn't exist, reset it in the store
+          commit("setHistory", {});
+        }
+      } catch (error) {
+        commit("setHistory", {});
+        console.error("Error fetching history:", error);
       }
     },
   },
