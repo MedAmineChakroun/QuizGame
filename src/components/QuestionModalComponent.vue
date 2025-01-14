@@ -51,7 +51,7 @@
             </template>
           </div>
           <HintsComponent @removeTwoWrongAnswers="handleRemoveTwoWrongAnswers"
-            @revealCorrectAnswer="handleRevealCorrectAnswer" />
+            @revealCorrectAnswer="handleRevealCorrectAnswer" @aiHint="handleAiHint" />
           <button type="button" class="btn btn-secondary" @click="$emit('close')">Close</button>
         </div>
       </div>
@@ -273,8 +273,6 @@ export default {
         alert("An error occurred while updating your heart count. Please try again.");
       }
     },
-
-
     async handleGameOver() {
       //register the game progress in history table
       this.RegisterProgressInHistory();
@@ -378,6 +376,51 @@ export default {
         alert("An error occurred while using the hint. Please try again.");
       }
     },
+    async handleAiHint() {
+      try {
+        // Update remaining hints on the backend
+        if (this.correctAnswer) {
+          toast.info('You have already revealed the correct answer :)', {
+            autoClose: 2000,
+            hideProgressBar: true,
+            position: "bottom-right",
+            transition: 'bounce'
+          });
+          return;
+        }
+        const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+        const genAI = new GoogleGenerativeAI("AIzaSyAh7sG7m3yXgdh4epDFL8o5gZQB0jRiu1Q");
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        const prompt = "give me a very good helpfull hint for a quigame app to solve this question: " + this.question.content + " the possible answers are: " + this.possibleAnswers.join(", ")
+          + "very helpfull plz , start with **hint**"
+          ;
+
+        const result = await model.generateContent(prompt);
+        const hintText = result.response.text();  // Get the hint from the response
+
+        // Show the hint as a toast notification at the top-center
+        toast.info(hintText, {
+          hideProgressBar: true,
+          position: "top-center",  // Display toast at the top center
+          transition: 'bounce',  // You can adjust this transition
+          autoClose: false,  // Prevent auto closing of the toast
+        });
+        await axios.put(
+          `http://localhost:8090/hints/${this.partieData.hints[2].id}`,
+          {
+            remainingHints: this.partieData.hints[2].remainingHints - 1,
+          }
+        );
+
+        // Tell the store to refetch the data
+        await this.$store.dispatch("fetchPartieData", this.partieData.id);
+      } catch (error) {
+        console.error("Error updating hints:", error);
+        alert("An error occurred while using the hint. Please try again.");
+      }
+    },
     async RegisterProgressInHistory() {
       try {
         await this.$store.dispatch("fetchHistory", {
@@ -397,7 +440,6 @@ export default {
         alert("An error occurred while registering your progress in history. Please try again.");
       }
     },
-
     async createHistory(playerId, categorieId) {
       try {
         const goldEarned = this.partieData.questionReached * 50;

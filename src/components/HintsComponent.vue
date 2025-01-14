@@ -3,9 +3,9 @@
         <div class="circle" v-for="n in 3" :key="n" @click="handleClick(n)">
             <v-tooltip bottom>
                 <template #activator="{ props }">
-
                     <div class="circle" v-bind="props">
-                        <img :src="require(`@/assets/image${n}.png`)" alt="Hint Image" />
+                        <!-- Add conditional class based on remainingHints -->
+                        <img :src="require(`@/assets/image${n}.png`)" alt="Hint Image" :class="getImageClass(n)" />
                     </div>
                 </template>
                 <span>{{ getHint(n) }}</span>
@@ -15,12 +15,12 @@
 </template>
 
 <script>
-import { toast } from 'vue3-toastify';
+import { toast } from "vue3-toastify";
 import { mapState } from "vuex";
-import 'vue3-toastify/dist/index.css';
+import "vue3-toastify/dist/index.css";
 
 export default {
-    name: 'HintsComponent',
+    name: "HintsComponent",
     methods: {
         handleClick(n) {
             switch (n) {
@@ -47,44 +47,53 @@ export default {
             if (this.partieData.hints[0].remainingHints > 0) {
                 this.$emit("removeTwoWrongAnswers");
             } else {
-                toast.info('You already used this hint!', {
+                toast.info("You already used this hint!", {
                     autoClose: 2000,
                     hideProgressBar: true,
                     position: "bottom-right",
-                    transition: 'bounce'
+                    transition: "bounce",
                 });
             }
-
         },
         handleRevealCorrectAnswer() {
             if (this.partieData.hints[1].remainingHints > 0) {
                 this.$emit("revealCorrectAnswer");
             } else {
-                toast.info('You already used this hint!', {
+                toast.info("You already used this hint!", {
                     autoClose: 2000,
                     hideProgressBar: true,
                     position: "bottom-right",
-                    transition: 'bounce'
+                    transition: "bounce",
                 });
             }
         },
         handleAiHint() {
-            toast.info('AI is Coming soon!', {
-                autoClose: 2000,
-                hideProgressBar: true,
-                position: "bottom-right",
-                transition: 'bounce'
-            });
+            if (this.partieData.hints[2].remainingHints > 0) {
+                this.$emit("aiHint");
+            } else {
+                toast.info("You already used this hint!", {
+                    autoClose: 2000,
+                    hideProgressBar: true,
+                    position: "bottom-right",
+                    transition: "bounce",
+                });
+            }
+        },
+        // New method to get the class based on the remaining hints
+        getImageClass(n) {
+            return this.partieData.hints[n - 1].remainingHints === 0
+                ? "used-hint"
+                : "";
         },
     },
     computed: {
         ...mapState({
-            partieData: state => state.partieData,  // Access partieData from Vuex store
+            partieData: (state) => state.partieData, // Access partieData from Vuex store
         }),
         hints() {
             return this.partieData.hints;
-        }
-    }
+        },
+    },
 };
 </script>
 
@@ -112,5 +121,13 @@ export default {
 .circle img {
     width: 65%;
     height: 70%;
+}
+
+/* Custom style for used hints */
+.used-hint {
+    opacity: 0.5;
+    /* Make the image appear faded */
+    filter: grayscale(100%);
+    /* Optional: Add a grayscale effect */
 }
 </style>

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@fortawesome/vue-fontawesome": "^3.0.6",
+    "@google/generative-ai": "^0.21.0",
     "@popperjs/core": "^2.11.8",
     "@vue/cli-service": "^5.0.8",
     "axios": "^1.7.2",
