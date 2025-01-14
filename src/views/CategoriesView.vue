@@ -10,6 +10,8 @@
           :categoryQuestionsCount="category.questionsCount" :maxQuestionReached="getMaxQuestionReached(category.id)" />
       </div>
     </div>
+    <FloatingButton @open-chat="openChat" />
+    <ChatWindow ref="chatWindow" />
   </div>
 </template>
 
@@ -18,13 +20,17 @@ import navBar from '@/components/navBar.vue';
 import playerBarSection from '@/components/playerBarSection.vue';
 import CategoryCard from '@/components/CategoryCard.vue';
 import axios from 'axios';
+import FloatingButton from '@/components/FloatingButton.vue';
+import ChatWindow from '@/components/ChatWindow.vue';
 
 export default {
   name: "CategoriesView",
   components: {
     navBar,
     playerBarSection,
-    CategoryCard
+    CategoryCard,
+    FloatingButton,
+    ChatWindow,
   },
   data() {
     return {
@@ -44,6 +50,9 @@ export default {
     this.fetchplayerData();
   },
   methods: {
+    openChat() {
+      this.$refs.chatWindow.openChat();
+    },
     async fetchplayerData() {
       const playerId = localStorage.getItem("firebaseUserUid");
       const response = await axios.get(`http://localhost:8090/players/player/${playerId}`);
