@@ -16,6 +16,7 @@ const vuetify = createVuetify({
   directives,
 });
 
+window.__VUE_PROD_HYDRATION_MISMATCH_DETAILS__ = false;
 const app = createApp(App);
 app.use(store);
 app.use(router);

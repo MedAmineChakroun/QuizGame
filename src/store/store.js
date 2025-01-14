@@ -39,8 +39,14 @@ const store = createStore({
         const response = await axios.get(
           `http://localhost:8090/parties/${partieId}`
         );
-        commit("setPartieData", response.data);
+
+        if (response.data && response.data.id) {
+          commit("setPartieData", response.data);
+        } else {
+          commit("setPartieData", {});
+        }
       } catch (error) {
+        commit("setPartieData", {});
         console.error("Error fetching partie data:", error);
       }
     },

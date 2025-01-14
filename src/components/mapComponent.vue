@@ -90,10 +90,15 @@ export default {
       }
     }
   },
-  mounted() {
+  async mounted() {
     const partieId = this.$route.params.partieId; // Retrieve partieId from route params
     if (partieId) {
       this.fetchPartieData(partieId);
+      // Fetch history for the current player and category
+      await this.$store.dispatch("fetchHistory", {
+        playerId: this.partieData.player.id,
+        categorieId: this.partieData.categorie.id,
+      });
     } else {
       console.error('Partie ID is not available.');
       this.loading = false;

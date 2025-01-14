@@ -1,12 +1,22 @@
 <template>
-  <div class="category-card" @mouseover="isHovered = true" @mouseleave="isHovered = false">
-    <div class="category-name">{{ categoryName }}</div>
+  <div class="category-card" :class="{ completed: maxQuestionReached === categoryQuestionsCount }"
+    @mouseover="isHovered = true" @mouseleave="isHovered = false">
+    <div class="category-name">
+      {{ categoryName }}
+    </div>
+    <div v-if="maxQuestionReached < categoryQuestionsCount" class="progress">
+      <span>{{ maxQuestionReached }} / {{ categoryQuestionsCount }}</span>
+    </div>
     <div v-if="isHovered" class="options">
-      <a href="javascript:void(0)" @click="createNewGame">New Game</a>
-      <a href="javascript:void(0)" @click="continueGame">Continue</a>
+      <a href="javascript:void(0)" @click="createNewGame" :class="{ 'disabled-btn': isGameCreated }">New Game</a>
+      <a href="javascript:void(0)" @click="continueGame" :class="{ 'disabled-btn': !isGameCreated }">Continue</a>
+    </div>
+    <div v-if="maxQuestionReached === categoryQuestionsCount" class="completed-badge">
+      <span>Completed ✓</span>
     </div>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -20,21 +30,47 @@ export default {
     categoryName: String,
     categoryDescription: String,
     categoryId: Number,
+    categoryQuestionsCount: Number,
+    maxQuestionReached: Number,
   },
   data() {
     return {
       isHovered: false,
+      histories: [],
+      isGameCreated: false,
     };
   },
   computed: {
     ...mapState({
       partieData: state => state.partieData,  // Access partieData from Vuex store
     }),
-    ...mapState({
-      history: state => state.history,  // Access history from Vuex store
-    }),
+    questionReached() {
+      return this.partieData.questionReached;
+    }
+
+  },
+  mounted() {
+    this.checkIfGameExists();
   },
   methods: {
+    async checkIfGameExists() {
+      const firebaseUserUid = localStorage.getItem("firebaseUserUid");
+      const categoryId = this.categoryId;
+
+      try {
+        const checkResponse = await axios.get(
+          `http://localhost:8090/parties/exists?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
+        );
+
+        if (checkResponse.data) {
+          // Game exists, disable the "New Game" button
+          this.isGameCreated = true;
+          this.$store.dispatch("fetchPartieData", checkResponse.data.id);
+        }
+      } catch (error) {
+        console.error("Error while checking if game exists:", error);
+      }
+    },
     // Function to check if the game already exists for the current player and category
     async createNewGame() {
       const firebaseUserUid = localStorage.getItem("firebaseUserUid");
@@ -47,18 +83,13 @@ export default {
         );
 
         if (checkResponse.data) {
-          // If the game exists, ask the user for confirmation to delete the old game
-          const userConfirmed = confirm("A game already exists for this category. Do you want to delete it and create a new one?");
-
-          if (!userConfirmed) {
-            // If the user cancels, simply return and do not create a new game
-            return;
-          }
-
-          // If the user confirmed, delete the existing game
-          await axios.delete(
-            `http://localhost:8090/parties/${checkResponse.data.id}`
-          );
+          // If a game exists, alert the user that they cannot create a new game
+          toast.error("You already have an existing game for this category. Please continue the game.", {
+            position: "top-center",
+            autoClose: 3000,
+            hideProgressBar: true,
+          });
+          return; // Prevent creation of a new game
         }
 
         // Now create the new game
@@ -99,15 +130,15 @@ export default {
           `http://localhost:8090/parties/exists?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
         );
 
-        const partieId = checkResponse.data.id;
-
         if (checkResponse.data) {
+          this.$store.dispatch("fetchPartieData", checkResponse.data.id);
 
-          await this.$store.dispatch("fetchHistory", {
-            playerId: this.partieData.player.id,
-            categorieId: this.partieData.categorie.id,
-          });
-          this.$router.push({ path: `/game/${partieId}` });
+
+          console.log("this.partieData", this.partieData);
+
+
+
+          this.$router.push({ path: `/game/${checkResponse.data.id}` });
         } else {
           toast.error("No game exists for this category.", {
             position: "top-center", // You can change position as needed
@@ -129,7 +160,6 @@ export default {
 .category-card {
   background-color: #fdf0d5;
   /* Vibrant background color */
-
   padding: 10px;
   margin-bottom: 10px;
   position: relative;
@@ -149,6 +179,31 @@ export default {
   align-items: center;
 }
 
+/* When the card is completed */
+.category-card.completed {
+  background-color: #7bed9f;
+  /* Light green background when completed */
+  box-shadow: 0px 8px 16px rgba(0, 128, 0, 0.3);
+  /* Enhanced shadow */
+}
+
+/* Completed badge */
+.completed-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: #27ae60;
+  /* Green background */
+  color: white;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 3;
+  /* Ensure the badge is above other content */
+}
+
+/* Hover effect */
 .category-card:hover {
   transform: scale(1.06) translateY(-5px);
   /* Slight hover lift */
@@ -219,5 +274,34 @@ export default {
   /* Change button color on hover */
   transform: scale(1.1);
   /* Slight hover effect */
+}
+
+.progress {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  height: auto;
+  background-color: #b4bfb9;
+  /* Green background */
+  color: grey;
+  padding: 5px 10px;
+  /* Increased padding for better spacing */
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  /* Adjust font size if needed */
+  line-height: 1.4;
+  /* Adjust line height for better vertical spacing */
+  z-index: 3;
+}
+
+.disabled-btn {
+  background-color: #f0f0f0 !important;
+  color: #aaa !important;
+  border: 2px solid #ddd;
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.7;
+  transition: all 0.3s ease;
 }
 </style>

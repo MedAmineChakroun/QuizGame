@@ -28,7 +28,7 @@
         </form>
 
         <p>
-            Don't have an account? <router-link to="/signup">Sign up</router-link>
+            Don't have an account? <router-link to="/login">Sign up</router-link>
         </p>
     </div>
 </template>
