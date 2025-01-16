@@ -1,6 +1,7 @@
 <template>
     <div class="shop-container">
         <navBar />
+        <player-bar-section />
         <div class="main-container">
             <h1 class="shop-title">Characters Shop</h1>
             <div v-if="Loading" class="loader">Loading...</div>
@@ -8,6 +9,7 @@
                 <div v-for="(character, index) in character" :key="index" class="character-card">
                     <img :src="'data:image/png;base64,' + character.base64Image" alt="Character Image"
                         class="character-image" />
+                    <hr />
                     <div class="character-info">
                         <h2 class="character-name">{{ character.name }}</h2>
                         <p class="character-category">Category: {{ character.category }}</p>
@@ -15,47 +17,71 @@
                             character.rarity }}</span></p>
                         <p class="character-price">Price: ${{ character.price }}</p>
                     </div>
-                    <div class="character-actions">
-                        <button class="btn-buy">Buy</button>
-                    </div>
+                    <button class="btn-buy" :class="{ 'btn-disabled': isCharacterPurchased(character.id) }"
+                        :disabled="isCharacterPurchased(character.id)"
+                        @click="buyCharacter(character.id, character.price)">
+                        {{ isCharacterPurchased(character.id) ? "Purchased" : "Buy" }}
+                    </button>
                 </div>
             </div>
         </div>
-        <backComponent />
+
     </div>
 </template>
 
 <script>
 import navBar from '@/components/navBar.vue';
-import backComponent from '@/components/BackToLobby.vue';
+import playerBarSection from '@/components/playerBarSection.vue'
 import axios from 'axios';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
+
 
 export default {
     name: "shopView",
     components: {
         navBar,
-        backComponent
+        playerBarSection
     },
     data() {
         return {
             character: [],
+            ShoppedCharacters: [],
             Loading: true
         }
     },
     mounted() {
         this.fetchCharacters();
+        this.fetchShoppedCharacters();
     },
     methods: {
+        isCharacterPurchased(characterId) {
+            return this.ShoppedCharacters.some(shopped => shopped.character.id === characterId);
+        },
         async fetchCharacters() {
             try {
                 const response = await axios.get('http://localhost:8090/characters');
-                console.log('characters:', response.data);
                 this.character = response.data;
                 this.Loading = false;
             } catch (error) {
                 console.error("There was an error fetching the characters:", error);
                 this.Loading = false;
             }
+        },
+        async fetchShoppedCharacters() {
+            try {
+                const player = await this.fetchPlayerData();
+                const playerId = player.id;
+                const response = await axios.get(`http://localhost:8090/shoppedCharacters/byPlayer/${playerId}`);
+                this.ShoppedCharacters = response.data;
+            } catch (error) {
+                console.error('error:', error);
+            }
+        },
+        async fetchPlayerData() {
+            const firebaseUserUid = localStorage.getItem("firebaseUserUid");
+            const playerResponse = await axios.get(`http://localhost:8090/players/player/${firebaseUserUid}`)
+            return playerResponse.data;
         },
         rarityClass(rarity) {
             switch (rarity) {
@@ -68,6 +94,48 @@ export default {
                 default:
                     return "common"; // Fallback to "common" if no match
             }
+        },
+        async buyCharacter(characterID, characterPrice) {
+            try {
+                const player = await this.fetchPlayerData();
+                const playerID = player.id;
+
+                if (player.gold < characterPrice) {
+                    toast.error('Not Enough Gold Champ!', {
+                        autoClose: 2000,
+                        hideProgressBar: true,
+                        position: "bottom-right",
+                        transition: 'bounce'
+                    });
+                    return;
+                }
+                await this.decreaseGoldFromPlayer(characterPrice)
+                const response = await axios.post(`http://localhost:8090/shoppedCharacters?playerId=${playerID}&characterId=${characterID}`);
+                await this.fetchShoppedCharacters();
+                toast.success(`${response.data.character.name} joined the team!`, {
+                    autoClose: 4000,
+                    hideProgressBar: true,
+                    position: "bottom-right",
+                    transition: 'bounce'
+                })
+            } catch (error) {
+                console.log("error:", error)
+            }
+
+        },
+        async decreaseGoldFromPlayer(characterPrice) {
+            try {
+                const player = await this.fetchPlayerData();
+                const playerId = player.id;
+                const newAmount = player.gold - characterPrice;
+                console.log("newAmount:", newAmount, "characterPrice:", characterPrice);
+                const response = await axios.put(`http://localhost:8090/players/${playerId}`, { "gold": newAmount });
+                console.log('update:', response.data)
+                this.$store.dispatch('fetchPlayerData');
+            } catch (error) {
+                console.log("error:", error)
+            }
+
         }
 
     }
@@ -75,6 +143,10 @@ export default {
 </script>
 
 <style scoped>
+hr {
+    margin: 0;
+}
+
 .shop-container {
     color: #333;
     font-family: "Lilita One", sans-serif;
@@ -82,7 +154,6 @@ export default {
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    margin-top: 100px;
 }
 
 .main-container {
@@ -199,6 +270,14 @@ export default {
     /* Darker shade for hover effect */
     background-color: #6aa414;
 }
+
+.btn-buy.btn-disabled {
+    background-color: #ccc;
+    /* Gray for disabled state */
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 
 @media (max-width: 768px) {
     .main-container {
