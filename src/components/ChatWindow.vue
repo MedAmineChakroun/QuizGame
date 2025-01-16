@@ -122,6 +122,9 @@ export default {
 
 /* Chat Messages */
 .chat-body {
+    display: flex;
+    /* Add this */
+    flex-direction: column;
     flex-grow: 1;
     overflow-y: auto;
     padding: 10px 0;

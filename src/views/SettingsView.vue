@@ -1,34 +1,39 @@
 <template>
     <div class="settings-view">
         <navBar />
-        
+
         <div class="settings-content">
             <div class="settings-options">
+                <!-- Music Control -->
                 <div>
                     <p class="music">Music</p>
-                     <button class="play-btn" @click="toggleAudio">{{ isPlaying ? 'Pause' : 'Play' }}</button>
-
+                    <button class="play-btn" @click="toggleAudio">
+                        {{ isPlaying ? 'Pause'
+                            : 'Play' }}
+                    </button>
                 </div>
-     
+
+
             </div>
         </div>
+        <backComponent />
     </div>
-    <backComponent/>
 </template>
 
+
 <script>
-import navBar from '@/components/navBar.vue'
-import backComponent from '@/components/BackToLobby.vue'
+import navBar from '@/components/navBar.vue';
+import backComponent from '@/components/BackToLobby.vue';
 
 export default {
     name: "SettingsView",
     components: {
         navBar,
-        backComponent
+        backComponent,
     },
     data() {
         return {
-            isPlaying: true
+            isPlaying: true,
         };
     },
     methods: {
@@ -36,19 +41,20 @@ export default {
             this.isPlaying = !this.isPlaying;
             this.$emit(this.isPlaying ? 'play-audio' : 'pause-audio');
         },
+
     },
-}
-
-
+};
 </script>
 
 <style scoped>
-.music{
+/* Existing Styles */
+.music {
     font-family: "Lilita One", sans-serif;
     color: #432818;
     font-size: 24px;
     margin: auto;
 }
+
 .play-btn {
     color: #ecf0f1;
     font-size: 17px;
@@ -94,12 +100,41 @@ export default {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 20px;
+    /* Add space between elements */
     align-items: center;
     justify-content: center;
-    
 }
 
+.language-switcher {
+    display: flex;
+    gap: 10px;
+}
+
+.lang-btn {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #3498db;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 8px 16px;
+    box-shadow: 0px 4px 0px #2980b9;
+    transition: all 0.2s;
+}
+
+.lang-btn:hover {
+    background-color: #2980b9;
+}
+
+.lang-btn:active {
+    box-shadow: 0px 2px 0px #2980b9;
+    position: relative;
+    top: 2px;
+}
+
+/* Responsive Design */
 @media (max-width: 600px) {
     .settings-options {
         max-width: 100%;

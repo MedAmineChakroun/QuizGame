@@ -1,35 +1,213 @@
 <template>
-    <navBar/>
-    <div class="container">
-            <h1>Coming Soon!</h1>
+    <div class="shop-container">
+        <navBar />
+        <div class="main-container">
+            <h1 class="shop-title">Characters Shop</h1>
+            <div v-if="Loading" class="loader">Loading...</div>
+            <div v-else class="characters-container">
+                <div v-for="(character, index) in character" :key="index" class="character-card">
+                    <img :src="'data:image/png;base64,' + character.base64Image" alt="Character Image"
+                        class="character-image" />
+                    <div class="character-info">
+                        <h2 class="character-name">{{ character.name }}</h2>
+                        <p class="character-category">Category: {{ character.category }}</p>
+                        <p class="character-rarity">Rarity: <span :class="rarityClass(character.rarity)">{{
+                            character.rarity }}</span></p>
+                        <p class="character-price">Price: ${{ character.price }}</p>
+                    </div>
+                    <div class="character-actions">
+                        <button class="btn-buy">Buy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <backComponent />
     </div>
-    <backComponent/>
 </template>
 
 <script>
 import navBar from '@/components/navBar.vue';
 import backComponent from '@/components/BackToLobby.vue';
+import axios from 'axios';
 
 export default {
     name: "shopView",
     components: {
         navBar,
         backComponent
+    },
+    data() {
+        return {
+            character: [],
+            Loading: true
+        }
+    },
+    mounted() {
+        this.fetchCharacters();
+    },
+    methods: {
+        async fetchCharacters() {
+            try {
+                const response = await axios.get('http://localhost:8090/characters');
+                console.log('characters:', response.data);
+                this.character = response.data;
+                this.Loading = false;
+            } catch (error) {
+                console.error("There was an error fetching the characters:", error);
+                this.Loading = false;
+            }
+        },
+        rarityClass(rarity) {
+            switch (rarity) {
+                case "RARE":
+                    return "rare";
+                case "EPIC":
+                    return "epic";
+                case "LEGENDARY":
+                    return "legendary";
+                default:
+                    return "common"; // Fallback to "common" if no match
+            }
+        }
+
     }
 }
 </script>
 
 <style scoped>
-.container {
-
-    position: relative;
-    top: 300px;
-    color: white;
+.shop-container {
+    color: #333;
     font-family: "Lilita One", sans-serif;
-    
-
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin-top: 100px;
 }
 
+.main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 15px;
+    max-width: 1200px;
+    width: 100%;
+}
 
-    
+.shop-title {
+    font-size: 48px;
+    text-align: center;
+    color: #70e000;
+    /* Tomato color */
+    margin-bottom: 40px;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    /* Added text shadow for a cool effect */
+}
+
+.loader {
+    font-size: 24px;
+    color: #ff6347;
+}
+
+.characters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 0 20px;
+}
+
+.character-card {
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 20px;
+    width: 250px;
+    height: 400px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.character-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.character-image {
+    width: 100%;
+    height: 180px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.character-info {
+    margin-top: 10px;
+}
+
+.character-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #494848;
+    margin-bottom: 8px;
+}
+
+.character-category,
+.character-rarity,
+.character-price {
+    font-size: 16px;
+    color: #666;
+    margin: 4px 0;
+}
+
+.rare {
+    color: #dc3545;
+    /* red for rare characters */
+}
+
+.common {
+    color: #007bff;
+    /* Blue for common characters */
+}
+
+.legendary {
+    color: #ff4500;
+    /* Orange for legendary characters */
+}
+
+.epic {
+    color: #8a2be2;
+    /* Blueviolet for epic characters */
+}
+
+.btn-buy {
+    background-color: #7cb518;
+    /* btn width all width parrent*/
+    width: 100%;
+    color: white;
+    font-size: 18px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-buy:hover {
+    /* Darker shade for hover effect */
+    background-color: #6aa414;
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        padding: 0 10px;
+    }
+
+    .character-card {
+        width: 100%;
+        max-width: 300px;
+    }
+}
 </style>
