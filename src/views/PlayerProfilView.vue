@@ -1,40 +1,31 @@
 <template>
-    <navBar/>
-    <playerBarSection/>
+    <navBar />
+    <playerBarSection />
     <h1>Player Profil</h1>
     <div class="profil-panel">
         <div class="left-container">
             <div class="player-fields-div">
                 <div class="player-field">
                     <div class="label-div">
-                        <label >UserName:</label>
-                    
+                        <label>UserName:</label>
                     </div>
                     <div>
-                        <input type="text" class="game-input">
-                        <button class="edit-button">Edit</button>
-                     </div>
+                        <input type="text" class="game-input" v-model="player.userName">
+                        <button class="edit-button" @click="updatePlayerData('userName')">Edit</button>
+                    </div>
                 </div>
                 <div class="player-field">
                     <div class="label-div">
-                        <label >Email:</label>
-                    
-                    </div>                  
-                      <div>
-                        <input type="text" class="game-input">
+                        <label>Email:</label>
+                    </div>
+                    <div>
+                        <input type="text" class="game-input" v-model="player.email">
                         <button class="edit-button">Edit</button>
-                     </div>
+                    </div>
                 </div>
-                <div class="player-field">
-                    <div class="label-div">
-                        <label >Password:</label>
-                
-                    </div>                    <div >
-                        <input type="text" class="game-input">
-                        <button class="edit-button">Edit</button>
-                     </div>
-                </div>
-                <button data-bs-toggle="modal" data-bs-target="#exampleModal" class="select-character-btn">Select Character</button>
+                <button data-bs-toggle="modal" data-bs-target="#exampleModal" class="select-character-btn">
+                    Select Character
+                </button>
             </div>
         </div>
         <div class="right-container">
@@ -43,15 +34,17 @@
             </div>
         </div>
     </div>
-    <backComponent class="backComponent"/>
-    <characterSelectionModal/>
+    <backComponent class="backComponent" />
+    <characterSelectionModal :playerId="this.player.id" />
 </template>
-
 <script>
 import navBar from "@/components/navBar.vue";
 import playerBarSection from "@/components/playerBarSection.vue";
 import characterSelectionModal from "@/components/characterSelectionModal.vue";
 import backComponent from "@/components/BackToLobby.vue";
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
+import axios from 'axios';
 
 export default {
     name: "PlayerProfilView",
@@ -60,16 +53,60 @@ export default {
         playerBarSection,
         characterSelectionModal,
         backComponent
-    }
-}
-</script>
+    },
+    data() {
+        return {
+            player: {}
+        };
+    },
+    mounted() {
+        this.fetchPlayerData();
+    },
+    methods: {
+        async fetchPlayerData() {
+            try {
+                const firebaseUserUid = localStorage.getItem("firebaseUserUid");
+                const playerResponse = await axios.get(`http://localhost:8090/players/player/${firebaseUserUid}`);
+                this.player = playerResponse.data;
+            } catch (error) {
+                console.error("Error fetching player data:", error);
+            }
+        },
+        async updatePlayerData(field) {
+            try {
 
+                const payload = {
+                    userName: this.player.userName,
+                    email: this.player.email
+                };
+                // Update specific player field here
+                await axios.put(`http://localhost:8090/players/${this.player.id}`, payload);
+                toast.success("Data updated successfully!", {
+                    autoClose: 2000,
+                    hideProgressBar: true,
+                    position: "bottom-right",
+                    transition: 'bounce'
+                });
+            } catch (error) {
+                console.error(`Error updating ${field}:`, error);
+                toast.error(`Failed to update ${field}. Please try again.`, {
+                    autoClose: 2000,
+                    hideProgressBar: true,
+                    position: "bottom-right",
+                    transition: 'bounce'
+                });
+            }
+        }
+    }
+};
+</script>
 <style scoped>
-.backComponent{
-   margin-top:100px;
-   margin-left: 50px;
+.backComponent {
+    margin-top: 100px;
+    margin-left: 50px;
 }
-.label-div{
+
+.label-div {
     position: relative;
     display: flex;
     align-self: start;
@@ -78,8 +115,9 @@ export default {
     font-family: "Lilita One", sans-serif;
     color: #582f0e;
 }
+
 h1 {
-    
+
     margin: 0 auto;
     color: white;
     font-family: "Lilita One", sans-serif;
@@ -101,45 +139,51 @@ h1 {
 }
 
 .right-container {
-    flex: 0.6; /* Flex property for equal width */
+    flex: 0.6;
+    /* Flex property for equal width */
     display: flex;
     justify-content: center;
     align-items: center;
-   
+
 }
 
 .left-container {
-    flex: 1; /* Flex property for equal width */
+    flex: 1;
+    /* Flex property for equal width */
     display: flex;
     justify-content: center;
     align-items: center;
-   
-    
+
+
 }
 
 .player-fields-div {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Space between input fields and buttons */
+    gap: 15px;
+    /* Space between input fields and buttons */
     width: 80%;
-    
+
     align-items: sta;
 }
 
 .player-field {
     display: flex;
-    flex-direction: column ;
+    flex-direction: column;
     align-items: center;
-    gap: 10px; /* Space between input and button */
+    gap: 10px;
+    /* Space between input and button */
     background-color: #ffe5b4;
     padding: 10px;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
-.player-field div{
+
+.player-field div {
     display: flex;
     gap: 20px;
 }
+
 .game-input {
     flex: 1;
     padding: 10px;
@@ -149,7 +193,8 @@ h1 {
     outline: none;
 }
 
-.edit-button, .select-character-btn {
+.edit-button,
+.select-character-btn {
     padding: 10px 15px;
     background-color: #f77f00;
     color: white;
@@ -160,16 +205,20 @@ h1 {
     transition: background-color 0.3s, transform 0.3s;
 }
 
-.edit-button:hover, .select-character-btn:hover {
+.edit-button:hover,
+.select-character-btn:hover {
     transform: scale(1.05);
     background-color: #ff6d00;
 
 }
 
 .select-character-btn {
-    align-self: center; /* Center the select character button */ /* Margin at the top of the button */
+    align-self: center;
+    /* Center the select character button */
+    /* Margin at the top of the button */
     padding: 15px 20px;
     background-color: #7cb518;
+    margin-top: 10px;
 }
 
 .select-character-btn:hover {
@@ -178,7 +227,8 @@ h1 {
 
 .character-img {
     width: 200px;
-    height: 300px; /* Example size for the character image */
+    height: 300px;
+    /* Example size for the character image */
     margin-right: 50px;
 }
 </style>
