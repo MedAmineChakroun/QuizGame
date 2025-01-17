@@ -30,7 +30,9 @@
         </div>
         <div class="right-container">
             <div class="character-div">
-                <img class="character-img" src="@/assets/redCharacter.png" alt="">
+                <img class="character-img" :src="'data:image/png;base64,' + SelectedCharacter.base64Image"
+                    alt="character">
+                <p class="character-name">{{ SelectedCharacter.name }}</p>
             </div>
         </div>
     </div>
@@ -45,6 +47,7 @@ import backComponent from "@/components/BackToLobby.vue";
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 import axios from 'axios';
+import { mapState } from "vuex";
 
 export default {
     name: "PlayerProfilView",
@@ -56,11 +59,17 @@ export default {
     },
     data() {
         return {
-            player: {}
+            player: {},
         };
+    },
+    computed: {
+        ...mapState({
+            SelectedCharacter: state => state.SelectedCharacter,  // Access partieData from Vuex store
+        }),
     },
     mounted() {
         this.fetchPlayerData();
+
     },
     methods: {
         async fetchPlayerData() {
@@ -225,10 +234,19 @@ h1 {
     background-color: #5c8001;
 }
 
+.character-div {
+    margin-right: 50px;
+}
+
 .character-img {
     width: 200px;
     height: 300px;
-    /* Example size for the character image */
-    margin-right: 50px;
+
+}
+
+.character-name {
+    font-family: "Lilita One", sans-serif;
+    color: #2c3e50;
+    font-size: 1.3rem;
 }
 </style>

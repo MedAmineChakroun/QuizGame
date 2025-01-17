@@ -6,6 +6,7 @@ const store = createStore({
     gold: 0,
     partieData: {},
     history: {},
+    SelectedCharacter: {},
   },
   mutations: {
     setGold(state, amount) {
@@ -16,6 +17,9 @@ const store = createStore({
     },
     setHistory(state, data) {
       state.history = data;
+    },
+    setSelectedCharacter(state, data) {
+      state.SelectedCharacter = data;
     },
   },
   actions: {
@@ -68,7 +72,35 @@ const store = createStore({
         console.error("Error fetching history:", error);
       }
     },
+    async fetchSelectedCharacter({ commit }, { characterId }) {
+      try {
+        const response = await axios.get(
+          `http://localhost:8090/characters/${characterId}`
+        );
+
+        if (response.data) {
+          commit("setSelectedCharacter", response.data);
+        } else {
+          commit("setSelectedCharacter", {});
+        }
+      } catch (error) {
+        commit("setSelectedCharacter", {});
+        console.error("Error fetching Character:", error);
+      }
+    },
+    async initializeStore({ dispatch, state }) {
+      if (
+        !state.SelectedCharacter ||
+        Object.keys(state.SelectedCharacter).length === 0
+      ) {
+        console.log("Initializing store: fetching default character...");
+        await dispatch("fetchSelectedCharacter", { characterId: 0 });
+      }
+    },
   },
+});
+store.dispatch("initializeStore").then(() => {
+  console.log("Store initialized.");
 });
 
 export default store;

@@ -19,7 +19,8 @@
         <div class="modal-body">
           <div class="character-container">
             <div class="character-img-div">
-              <img class="character-img" src="@/assets/redCharacter.png" alt="Red Character">
+              <img class="character-img" :src="'data:image/png;base64,' + selectedCharacter.base64Image"
+                alt="Character image">
             </div>
             <div class="top-elements">
               <div v-if="loading">Loading...</div>
@@ -96,6 +97,9 @@ export default {
     },
     ...mapState({
       history: state => state.history,
+    }),
+    ...mapState({
+      selectedCharacter: state => state.SelectedCharacter,
     }),
     MaxQuestionReached() {
       return this.history.maxQuestionReached || 0;

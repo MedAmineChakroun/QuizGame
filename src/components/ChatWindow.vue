@@ -43,7 +43,6 @@ export default {
         openChat() {
             this.isVisible = true;
             this.messages.push(`AI: Hello ${this.playerData.userName}! How can I help you?`);
-            console.log(this.playerData);
         },
         closeChat() {
             this.isVisible = false;

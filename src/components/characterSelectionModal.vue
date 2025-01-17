@@ -14,14 +14,18 @@
                             <span class="visually-hidden">Loading...</span>
                         </div>
                     </div>
-                    <div v-else>
+                    <div v-else class="scrollable-content">
                         <div class="characters-div">
                             <!-- Loop through characters -->
-                            <div v-for="(shoppedCharacter, index) in characters" :key="index" class="character-div">
+                            <div v-for="(shoppedCharacter, index) in characters" :key="index"
+                                :class="['character-div', { 'selected': selectedCharacterId === shoppedCharacter.character.id }]">
                                 <img :src="'data:image/png;base64,' + shoppedCharacter.character.image"
-                                    alt="Character Image" />
+                                    alt="Character Image" @error="setAltImage($event)" />
                                 <p class="character-name">{{ shoppedCharacter.character.name }}</p>
-                                <button class="select-btn" @click="selectCharacter(shoppedCharacter)">Select</button>
+                                <p class="character-category">{{ shoppedCharacter.character.category }}</p>
+                                <button class="select-btn" @click="selectCharacter(shoppedCharacter)">
+                                    {{ selectedCharacterId === shoppedCharacter.character.id ? 'Selected' : 'Select' }}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -34,7 +38,6 @@
     </div>
 </template>
 
-
 <script>
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
@@ -44,10 +47,11 @@ export default {
     name: "CharacterSelectionModal",
     data() {
         return {
-            characters: [],  // Initialize as an array
-            loading: false,  // Loading state to show loading spinner
-            retryCount: 0,   // Retry logic counter
-            maxRetries: 3    // Maximum number of retries on failure
+            characters: [],
+            loading: false,
+            retryCount: 0,
+            maxRetries: 3,
+            selectedCharacterId: null,
         };
     },
     props: {
@@ -55,39 +59,59 @@ export default {
     },
     mounted() {
         this.fetchShoppedCharacters();
+        this.selectedCharacterId = this.$store.state.SelectedCharacter.id;
     },
     methods: {
         async fetchShoppedCharacters() {
-            this.loading = true;  // Start loading spinner
+            this.loading = true;
             try {
                 const response = await axios.get(`http://localhost:8090/shoppedCharacters/byPlayer/${this.playerId}`);
                 this.characters = response.data;
-                this.loading = false;  // Stop loading spinner
             } catch (error) {
                 console.error(error);
                 if (this.retryCount < this.maxRetries) {
                     this.retryCount++;
-                    setTimeout(this.fetchShoppedCharacters, 2000); // Retry after 2 seconds
+                    setTimeout(this.fetchShoppedCharacters, 2000);
                 } else {
                     toast.error("Error fetching characters after multiple attempts!");
-                    this.loading = false;  // Stop loading spinner
                 }
+            } finally {
+                this.loading = false;
             }
         },
-        selectCharacter(character) {
-            // Handle character selection logic (e.g., saving to a database or local storage)
-            toast.success(`${character.character.name} selected!`);
-            console.log('Selected Character:', character);
+        async selectCharacter(shoppedCharacter) {
+            try {
+                await this.$store.dispatch("fetchSelectedCharacter", { characterId: shoppedCharacter.character.id });
+                this.selectedCharacterId = shoppedCharacter.character.id;
+                toast.success(`${shoppedCharacter.character.name} selected!`, {
+                    autoClose: 2000,
+                    hideProgressBar: true,
+                    position: "bottom-right",
+                    transition: 'bounce'
+                });
+            } catch (error) {
+                console.error('Error selecting character:', error);
+                toast.error("Failed to select character. Please try again.");
+            }
         }
     }
 };
 </script>
 
 <style scoped>
+/* General Styling */
 * {
     font-family: "Lilita One", sans-serif;
 }
 
+/* Modal Body Scrollable Content */
+.scrollable-content {
+    max-height: 100%;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+/* Button Styling */
 .select-btn {
     padding: 12px 18px;
     background-color: #f77f00;
@@ -104,15 +128,16 @@ export default {
     background-color: #ff6d00;
 }
 
+/* Characters Grid Styling */
 .characters-div {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
-    padding: 0 20px;
-    margin-top: 70px;
+
 }
 
+/* Individual Character Card */
 .character-div {
     display: flex;
     flex-direction: column;
@@ -124,7 +149,11 @@ export default {
     transition: 0.3s;
     gap: 16px;
     padding: 10px;
+    border: 3px solid transparent;
+}
 
+.character-div.selected {
+    border: 3px solid #f77f00;
 }
 
 .character-div img {
@@ -144,9 +173,16 @@ export default {
     margin: 0;
 }
 
+.character-category {
+    font-size: 0.9rem;
+    color: gray;
+    margin: 0;
+}
+
+/* Modal Styling */
 .modal-body {
-    height: 500px !important;
     background-color: #fefae0;
+    height: 500px;
 }
 
 .loading-spinner {
@@ -171,5 +207,9 @@ export default {
     background-color: #f77f00;
     color: white;
     font-size: 1.25rem;
+}
+
+.modal-title {
+    color: white;
 }
 </style>

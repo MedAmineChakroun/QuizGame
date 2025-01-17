@@ -179,13 +179,7 @@ export default {
   align-items: center;
 }
 
-/* When the card is completed */
-.category-card.completed {
-  background-color: #7bed9f;
-  /* Light green background when completed */
-  box-shadow: 0px 8px 16px rgba(0, 128, 0, 0.3);
-  /* Enhanced shadow */
-}
+
 
 /* Completed badge */
 .completed-badge {
@@ -197,7 +191,6 @@ export default {
   color: white;
   padding: 5px 10px;
   border-radius: 10px;
-  font-weight: bold;
   font-size: 16px;
   z-index: 3;
   /* Ensure the badge is above other content */
@@ -213,13 +206,11 @@ export default {
 
 .category-name {
   font-size: 36px;
-  color: #772f1a;
+  color: #7cb518;
   /* Subtle text shadow */
   text-align: center;
   z-index: 1;
-  /* Keep the category name above the options */
   transition: opacity 0.3s;
-  /* Smooth fade-out effect */
 }
 
 .options {
@@ -303,5 +294,17 @@ export default {
   pointer-events: none;
   opacity: 0.7;
   transition: all 0.3s ease;
+}
+
+.category-card.completed {
+  background-color: #7cb518;
+}
+
+.category-card.completed .category-name {
+  color: white !important;
+}
+
+.category-card.completed a {
+  background-color: #7cb518;
 }
 </style>

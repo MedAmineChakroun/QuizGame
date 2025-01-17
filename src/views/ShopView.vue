@@ -15,7 +15,9 @@
                         <p class="character-category">Category: {{ character.category }}</p>
                         <p class="character-rarity">Rarity: <span :class="rarityClass(character.rarity)">{{
                             character.rarity }}</span></p>
-                        <p class="character-price">Price: ${{ character.price }}</p>
+                        <p class="character-price">Price:
+                            {{ character.price === 0 ? 'Free' : '$' + character.price }}
+                        </p>
                     </div>
                     <button class="btn-buy" :class="{ 'btn-disabled': isCharacterPurchased(character.id) }"
                         :disabled="isCharacterPurchased(character.id)"
