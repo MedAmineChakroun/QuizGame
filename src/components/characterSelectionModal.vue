@@ -41,7 +41,8 @@
 <script>
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
-import axios from 'axios';
+import api from '@/api';
+
 
 export default {
     name: "CharacterSelectionModal",
@@ -65,7 +66,7 @@ export default {
         async fetchShoppedCharacters() {
             this.loading = true;
             try {
-                const response = await axios.get(`http://localhost:8090/shoppedCharacters/byPlayer/${this.playerId}`);
+                const response = await api.get(`/shoppedCharacters/byPlayer/${this.playerId}`);
                 this.characters = response.data;
             } catch (error) {
                 console.error(error);

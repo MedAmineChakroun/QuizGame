@@ -57,13 +57,14 @@
         </div>
       </div>
     </div>
+
   </div>
 </template>
 
 
 <script>
 import QuestionService from "@/services/QuestionService"; // Adjust the path based on your folder structure
-import axios from "axios";
+import api from '@/api';
 import { mapState } from "vuex";
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
@@ -72,7 +73,8 @@ import HintsComponent from "./HintsComponent.vue"; // Import the Hints component
 export default {
   name: "QuestionModalComponent",
   components: {
-    HintsComponent
+    HintsComponent,
+
   },
   props: {
     levelId: {
@@ -114,7 +116,7 @@ export default {
       possibleAnswers: [],
       loading: false,
       wrongAnswers: [],
-      correctAnswer: null
+      correctAnswer: null,
     };
   },
   mounted() {
@@ -212,14 +214,20 @@ export default {
           return;
         }
         // Fetch the current gold amount for the player
-        const response = await axios.get(`http://localhost:8090/players/${playerId}`);
+        const response = await api.get(`/players/${playerId}`);
         const newAmount = gold + response.data.gold;
 
         // Update the player's gold amount
-        await axios.put(`http://localhost:8090/players/${playerId}`, { "gold": newAmount });
+        await api.put(`/players/${playerId}`, { "gold": newAmount });
 
         this.$store.commit("setGold", newAmount);
         // Optionally update the UI or emit an event to refresh the other component
+        toast.success(`${gold} coins added to your budget!`, {
+          autoClose: 2000,
+          hideProgressBar: true,
+          position: "bottom-right",
+          transition: 'bounce'
+        });
 
       } catch (error) {
         // Log the error or handle it appropriately
@@ -228,7 +236,7 @@ export default {
     },
     async unlockQuestion() {
       try {
-        const response = await axios.put(`http://localhost:8090/parties/${this.partieData.id}`, {
+        const response = await api.put(`/parties/${this.partieData.id}`, {
           "questionReached": this.partieData.questionReached + 1,
           "nbHeart": this.partieData.nbHeart
         });
@@ -252,7 +260,7 @@ export default {
 
         // Only update API if there are changes to make
         if (newNbHeart !== currentNbHeart) {
-          const response = await axios.put(`http://localhost:8090/parties/${this.partieData.id}`, {
+          const response = await api.put(`/parties/${this.partieData.id}`, {
             "nbHeart": newNbHeart,
             "questionReached": this.partieData.questionReached,
           });
@@ -282,7 +290,7 @@ export default {
       this.RegisterProgressInHistory();
 
 
-      await axios.delete(`http://localhost:8090/parties/${this.partieData.id}`);
+      await api.delete(`/parties/${this.partieData.id}`);
 
 
       this.$router.push({ path: `/defeat` });
@@ -292,7 +300,7 @@ export default {
       //register the game progress in history table
       this.RegisterProgressInHistory();
 
-      await axios.delete(`http://localhost:8090/parties/${this.partieData.id}`);
+      await api.delete(`/parties/${this.partieData.id}`);
       this.$router.push({ path: `/victory` });
       return
     },
@@ -318,8 +326,8 @@ export default {
           });
           return;
         }
-        await axios.put(
-          `http://localhost:8090/hints/${this.partieData.hints[0].id}`,
+        await api.put(
+          `/hints/${this.partieData.hints[0].id}`,
           {
             remainingHints: this.partieData.hints[0].remainingHints - 1,
           }
@@ -362,8 +370,8 @@ export default {
           });
           return;
         }
-        await axios.put(
-          `http://localhost:8090/hints/${this.partieData.hints[1].id}`,
+        await api.put(
+          `/hints/${this.partieData.hints[1].id}`,
           {
             remainingHints: this.partieData.hints[1].remainingHints - 1,
           }
@@ -411,8 +419,8 @@ export default {
           transition: 'bounce',  // You can adjust this transition
           autoClose: false,  // Prevent auto closing of the toast
         });
-        await axios.put(
-          `http://localhost:8090/hints/${this.partieData.hints[2].id}`,
+        await api.put(
+          `/hints/${this.partieData.hints[2].id}`,
           {
             remainingHints: this.partieData.hints[2].remainingHints - 1,
           }
@@ -447,8 +455,8 @@ export default {
     async createHistory(playerId, categorieId) {
       try {
         const goldEarned = this.partieData.questionReached * 50;
-        const response = await axios.post(
-          `http://localhost:8090/histories?playerId=${playerId}&categorieId=${categorieId}`,
+        const response = await api.post(
+          `/histories?playerId=${playerId}&categorieId=${categorieId}`,
           {
             goldEarned: goldEarned,
             maxQuestionReached: this.partieData.questionReached
@@ -475,8 +483,8 @@ export default {
         goldEarned -= 50;
       }
 
-      const response = await axios.put(
-        `http://localhost:8090/histories/${this.history.id}`,
+      const response = await api.put(
+        `/histories/${this.history.id}`,
         {
           "goldEarned": goldEarned,
           "maxQuestionReached": this.partieData.questionReached
@@ -642,5 +650,18 @@ export default {
   color: white;
 
   transition: background-color 0.3s ease-in-out;
+}
+
+.lottie-animation-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  /* Full height of the parent container */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 </style>

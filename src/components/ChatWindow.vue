@@ -18,7 +18,8 @@
 
 <script>
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import axios from "axios";
+import api from '@/api';
+
 export default {
     data() {
         return {
@@ -31,7 +32,7 @@ export default {
     },
     async mounted() {
         const playerfirbaseId = localStorage.getItem("firebaseUserUid");
-        await axios.get(`http://localhost:8090/players/player/${playerfirbaseId}`)
+        await api.get(`/players/player/${playerfirbaseId}`)
             .then(response => {
                 this.playerData = response.data;
             })

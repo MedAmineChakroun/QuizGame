@@ -46,7 +46,7 @@ import characterSelectionModal from "@/components/characterSelectionModal.vue";
 import backComponent from "@/components/BackToLobby.vue";
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
-import axios from 'axios';
+import api from '@/api';
 import { mapState } from "vuex";
 
 export default {
@@ -75,7 +75,7 @@ export default {
         async fetchPlayerData() {
             try {
                 const firebaseUserUid = localStorage.getItem("firebaseUserUid");
-                const playerResponse = await axios.get(`http://localhost:8090/players/player/${firebaseUserUid}`);
+                const playerResponse = await api.get(`/players/player/${firebaseUserUid}`);
                 this.player = playerResponse.data;
             } catch (error) {
                 console.error("Error fetching player data:", error);
@@ -83,13 +83,13 @@ export default {
         },
         async updatePlayerData(field) {
             try {
-
                 const payload = {
                     userName: this.player.userName,
-                    email: this.player.email
+                    email: this.player.email,
+                    gold: this.player.gold
                 };
                 // Update specific player field here
-                await axios.put(`http://localhost:8090/players/${this.player.id}`, payload);
+                await api.put(`/players/${this.player.id}`, payload);
                 toast.success("Data updated successfully!", {
                     autoClose: 2000,
                     hideProgressBar: true,

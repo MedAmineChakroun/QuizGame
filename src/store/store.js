@@ -1,5 +1,5 @@
 import { createStore } from "vuex";
-import axios from "axios";
+import api from "@/api";
 
 const store = createStore({
   state: {
@@ -30,9 +30,7 @@ const store = createStore({
           console.error("Firebase User UID is missing from localStorage.");
           return;
         }
-        const response = await axios.get(
-          `http://localhost:8090/players/player/${firebaseUserUid}`
-        );
+        const response = await api.get(`/players/player/${firebaseUserUid}`);
         commit("setGold", response.data.gold);
       } catch (error) {
         console.error("Error fetching player data:", error);
@@ -40,9 +38,7 @@ const store = createStore({
     },
     async fetchPartieData({ commit }, partieId) {
       try {
-        const response = await axios.get(
-          `http://localhost:8090/parties/${partieId}`
-        );
+        const response = await api.get(`/parties/${partieId}`);
 
         if (response.data && response.data.id) {
           commit("setPartieData", response.data);
@@ -51,17 +47,18 @@ const store = createStore({
         }
       } catch (error) {
         commit("setPartieData", {});
-        console.error("Error fetching partie data:", error);
+        console.error("Error fetching partie", partieId, " data:", error);
       }
     },
     async fetchHistory({ commit }, { playerId, categorieId }) {
       try {
-        const response = await axios.get(
-          `http://localhost:8090/histories/player/${playerId}/category/${categorieId}`
+        const response = await api.get(
+          `/histories/player/${playerId}/category/${categorieId}`
         );
 
         if (response.data && response.data.id) {
           // If the history exists, set it in the store
+          console.log("history:", response.data);
           commit("setHistory", response.data);
         } else {
           // If the history doesn't exist, reset it in the store
@@ -74,9 +71,7 @@ const store = createStore({
     },
     async fetchSelectedCharacter({ commit }, { characterId }) {
       try {
-        const response = await axios.get(
-          `http://localhost:8090/characters/${characterId}`
-        );
+        const response = await api.get(`/characters/${characterId}`);
 
         if (response.data) {
           commit("setSelectedCharacter", response.data);

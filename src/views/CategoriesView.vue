@@ -19,7 +19,7 @@
 import navBar from '@/components/navBar.vue';
 import playerBarSection from '@/components/playerBarSection.vue';
 import CategoryCard from '@/components/CategoryCard.vue';
-import axios from 'axios';
+import api from '@/api';
 import FloatingButton from '@/components/FloatingButton.vue';
 import ChatWindow from '@/components/ChatWindow.vue';
 
@@ -40,7 +40,7 @@ export default {
     };
   },
   async created() {
-    await axios.get('http://localhost:8090/categories')
+    await api.get('/categories')
       .then(response => {
         this.categories = response.data;
       })
@@ -55,15 +55,15 @@ export default {
     },
     async fetchplayerData() {
       const playerId = localStorage.getItem("firebaseUserUid");
-      const response = await axios.get(`http://localhost:8090/players/player/${playerId}`);
+      const response = await api.get(`/players/player/${playerId}`);
       this.playerData = response.data;
       this.fetchPlayerHistory();
     },
     async fetchPlayerHistory() {
       const playerId = this.playerData.id;
       try {
-        const response = await axios.get(
-          `http://localhost:8090/histories/player/${playerId}`
+        const response = await api.get(
+          `/histories/player/${playerId}`
         );
 
         this.histories = response.data;

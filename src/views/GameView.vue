@@ -8,7 +8,8 @@
 <script>
 import navBar from '@/components/navBar.vue';
 import mapComponent from '@/components/mapComponent.vue';
-import axios from 'axios';
+import api from '@/api';
+
 
 export default {
     name: "GameView",
@@ -26,7 +27,7 @@ export default {
 
         try {
             // Fetch the party details to get the categorieId
-            const response = await axios.get(`http://localhost:8090/parties/${partieId}`);
+            const response = await api.get(`/parties/${partieId}`);
 
             this.categorieId = response.data.categorie.id; // Assign categorieId from response
         } catch (error) {

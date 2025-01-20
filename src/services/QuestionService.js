@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "@/api";
 
 class QuestionService {
   // Method to fetch questions based on category ID
@@ -6,10 +6,10 @@ class QuestionService {
     if (categorieId == null) {
       return;
     }
-    const questionUrl = `http://localhost:8090/questions/category/${categorieId}`;
+    const questionUrl = `/questions/category/${categorieId}`;
 
     try {
-      const response = await axios.get(questionUrl);
+      const response = await api.get(questionUrl);
       return response.data; // Return the questions
     } catch (error) {
       console.error("Error fetching questions:", error);
@@ -19,9 +19,9 @@ class QuestionService {
 
   // Method to fetch possible answers for a given question ID
   async fetchPossibleAnswers(questionId) {
-    const answerUrl = `http://localhost:8090/possibleAnswers/question/${questionId}`;
+    const answerUrl = `/possibleAnswers/question/${questionId}`;
     try {
-      const response = await axios.get(answerUrl);
+      const response = await api.get(answerUrl);
 
       return response.data; // Return the possible answers
     } catch (error) {
@@ -30,10 +30,10 @@ class QuestionService {
     }
   }
   async fetchQuestionById(questionId) {
-    const questionUrl = `http://localhost:8090/questions/${questionId}`;
+    const questionUrl = `/questions/${questionId}`;
 
     try {
-      const response = await axios.get(questionUrl);
+      const response = await api.get(questionUrl);
 
       return response.data; // Return the question
     } catch (error) {

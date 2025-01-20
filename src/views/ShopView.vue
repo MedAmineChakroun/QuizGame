@@ -34,7 +34,7 @@
 <script>
 import navBar from '@/components/navBar.vue';
 import playerBarSection from '@/components/playerBarSection.vue'
-import axios from 'axios';
+import api from '@/api';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
@@ -62,7 +62,7 @@ export default {
         },
         async fetchCharacters() {
             try {
-                const response = await axios.get('http://localhost:8090/characters');
+                const response = await api.get('/characters');
                 this.character = response.data;
                 this.Loading = false;
             } catch (error) {
@@ -74,7 +74,7 @@ export default {
             try {
                 const player = await this.fetchPlayerData();
                 const playerId = player.id;
-                const response = await axios.get(`http://localhost:8090/shoppedCharacters/byPlayer/${playerId}`);
+                const response = await api.get(`/shoppedCharacters/byPlayer/${playerId}`);
                 this.ShoppedCharacters = response.data;
             } catch (error) {
                 console.error('error:', error);
@@ -82,7 +82,7 @@ export default {
         },
         async fetchPlayerData() {
             const firebaseUserUid = localStorage.getItem("firebaseUserUid");
-            const playerResponse = await axios.get(`http://localhost:8090/players/player/${firebaseUserUid}`)
+            const playerResponse = await api.get(`/players/player/${firebaseUserUid}`)
             return playerResponse.data;
         },
         rarityClass(rarity) {
@@ -112,7 +112,7 @@ export default {
                     return;
                 }
                 await this.decreaseGoldFromPlayer(characterPrice)
-                const response = await axios.post(`http://localhost:8090/shoppedCharacters?playerId=${playerID}&characterId=${characterID}`);
+                const response = await api.post(`/shoppedCharacters?playerId=${playerID}&characterId=${characterID}`);
                 await this.fetchShoppedCharacters();
                 toast.success(`${response.data.character.name} joined the team!`, {
                     autoClose: 4000,
@@ -131,7 +131,7 @@ export default {
                 const playerId = player.id;
                 const newAmount = player.gold - characterPrice;
                 console.log("newAmount:", newAmount, "characterPrice:", characterPrice);
-                const response = await axios.put(`http://localhost:8090/players/${playerId}`, { "gold": newAmount });
+                const response = await api.put(`/players/${playerId}`, { "gold": newAmount });
                 console.log('update:', response.data)
                 this.$store.dispatch('fetchPlayerData');
             } catch (error) {

@@ -19,7 +19,7 @@
 
 
 <script>
-import axios from 'axios';
+import api from '@/api';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 import { mapState } from "vuex";
@@ -58,8 +58,8 @@ export default {
       const categoryId = this.categoryId;
 
       try {
-        const checkResponse = await axios.get(
-          `http://localhost:8090/parties/exists?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
+        const checkResponse = await api.get(
+          `/parties/exists?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
         );
 
         if (checkResponse.data) {
@@ -78,8 +78,8 @@ export default {
 
       try {
         // Check if the game already exists for the current category and user
-        const checkResponse = await axios.get(
-          `http://localhost:8090/parties/exists?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
+        const checkResponse = await api.get(
+          `/parties/exists?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
         );
 
         if (checkResponse.data) {
@@ -93,8 +93,8 @@ export default {
         }
 
         // Now create the new game
-        const response = await axios.post(
-          `http://localhost:8090/parties/createNewPartie?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
+        const response = await api.post(
+          `/parties/createNewPartie?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
         );
 
         if (response.status === 201) {
@@ -125,18 +125,16 @@ export default {
       const categoryId = this.categoryId;
 
       try {
-        // Check if the game exists for the current category and user
-        const checkResponse = await axios.get(
-          `http://localhost:8090/parties/exists?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
+
+        const checkResponse = await api.get(
+          `/parties/exists?firebaseId=${firebaseUserUid}&categoryId=${categoryId}`
         );
 
         if (checkResponse.data) {
-          this.$store.dispatch("fetchPartieData", checkResponse.data.id);
+          await this.$store.dispatch("fetchPartieData", checkResponse.data.id);
 
-
+          console.log("check:", checkResponse.data);
           console.log("this.partieData", this.partieData);
-
-
 
           this.$router.push({ path: `/game/${checkResponse.data.id}` });
         } else {
@@ -297,12 +295,13 @@ export default {
 }
 
 .category-card.completed {
-  background-color: #7cb518;
+  background-image: url('../assets/wave-haikei3.png');
+  background-size: cover;
+  /* Ensures the image covers the entire card */
+  background-position: center;
+  /* Centers the image */
 }
 
-.category-card.completed .category-name {
-  color: white !important;
-}
 
 .category-card.completed a {
   background-color: #7cb518;
